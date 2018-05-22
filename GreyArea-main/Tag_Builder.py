@@ -1,11 +1,13 @@
 
+from Get_file import *
 from tkinter import *
 from functools import partial
 
-class File_Type:
+class SessionTags:
     def __init__(self, origin):
         # print(origin, origin.response, type(origin.root1))
-        self.origin = origin.root1
+        self.window = origin.root1
+        self.origin = origin
         self.response = None
         self.tag_list = []
         self.exist = False
@@ -17,7 +19,7 @@ class File_Type:
         return
 
     def get_tags(self):
-        self.local_frame= Frame(self.origin )
+        self.local_frame= Frame(self.window )
         self.local_frame.grid()
         Label(self.local_frame, text="Please specify you're object tags").grid(row=0, column=0, columnspan=2)
 
@@ -51,8 +53,10 @@ class File_Type:
     def quit_loop(self, event=NONE):
         # self.local.quit()
         self.local_frame.destroy()
-        self.origin.quit()
+        self.origin.session_files = SessionFiles(self.origin)
+        # self.window.quit()
         # exit()
+        return
 
     def del_button(self, i):
         # counter = 0

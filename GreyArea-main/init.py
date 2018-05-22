@@ -3,26 +3,27 @@
 
 from tkinter import *
 from tkinter import ttk
-from Sel_File_Type import *
+from Tag_Builder import *
 from module_template import *
-
 
 class Controller:
     def __init__(self):
         # global session
         self.var = None
         self.response = None
-        self.session = None
+        self.session_tags = None
+        self.session_files = None
 
         self.root1 = Tk()
         self.root1.title("Welcome")
         self.get_type()
 
-        self.testcall = Xxxxx(self)
+        # self.testcall = Xxxxx(self)
                 ### this is an example external funtion/class call
                 ### refer to module_template.py
                 ### passes self (this instance of Controller)
         # self.root1.mainloop()
+
         return
 
     def get_type(self):
@@ -53,20 +54,22 @@ class Controller:
 
     def quit_loop(self, event=NONE):
         self.frame.destroy()
-        self.session = File_Type(self)
+        self.session_tags = SessionTags(self)
         # self.root1.quit()
         return
 
 
 primary = Controller()
-session = primary.session
-# session = File_Type(primary)
+session_tags = primary.session_tags
+# session_tags = SessionTags(primary)
 
 
 primary.root1.mainloop()
 
-print (primary.response, 'session tags: ', primary.session.tag_list, primary.session.response, primary.session.exist, "The End")
-
-
+print (primary.response, 'session tags: ', primary.session_tags.tag_list, primary.session_tags.response, primary.session_tags.exist, "The End")
+try:
+    print("selected files are: ", primary.session_files.files)
+except:
+    print("error: data not stored in variable.")
 ### example code section for file import handling
 ### https://gist.github.com/Yagisanatode/0d1baad4e3a871587ab1
