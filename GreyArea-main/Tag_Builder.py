@@ -9,18 +9,24 @@ class SessionTags:
         self.window = origin.root1
         self.origin = origin
         self.response = None
-        self.tag_list = []
+        self.tag_list = self.origin.tags
         self.exist = False
         self.tempbutton = None
-        self.local_frame = None
+        self.local_frame = Frame(self.origin.tags_frame)
 
-        self.get_tags()
+        if self.origin.tf_active:
+            return
+        elif self.origin.df_active:
+            return
+        else:
+            self.origin.tf_active = True
+            print('tf set true')
+            self.select_tags()
 
         return
 
-    def get_tags(self):
-        self.local_frame= Frame(self.window )
-        self.local_frame.grid()
+    def select_tags(self):
+        self.local_frame.grid(row=1, column=3)
         Label(self.local_frame, text="Please specify you're object tags").grid(row=0, column=0, columnspan=2)
 
         U_input_label = Label(self.local_frame, text="Enter tag")
@@ -29,12 +35,13 @@ class SessionTags:
         global U_input
         U_input = Entry(self.local_frame, width=20, )
         U_input.grid(row=2, column=1)
+        U_input.bind("<Return>", self.add_tag)
 
         U_input_enter = Button(self.local_frame, text="Enter")
         U_input_enter.grid(row=2, column=2)
         U_input_enter.bind("<Button-1>", self.add_tag)
 
-        U_input_exit = Button(self.local_frame, text="exit")
+        U_input_exit = Button(self.local_frame, text="Done")
         U_input_exit.grid(column=2)
         U_input_exit.bind("<Button-1>", self.quit_loop)
 
@@ -52,8 +59,11 @@ class SessionTags:
 
     def quit_loop(self, event=NONE):
         # self.local.quit()
+        self.origin.tf_active = False
+        print('tf set false')
+        self.origin.tags = self.tag_list
         self.local_frame.destroy()
-        self.origin.session_files = SessionFiles(self.origin)
+        # self.origin.session_files = SessionFiles(self.origin)
         # self.window.quit()
         # exit()
         return

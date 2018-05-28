@@ -8,34 +8,37 @@ from tkinter.filedialog import askopenfilename
 
 class SessionFiles:
     def __init__(self, origin):
-        self.files = []
-        self.U_input = None
-            ### variable to hold user input field
-            ### created here so it is available to all functions
+        self.origin = origin
+        self.files_list = self.origin.files
         self.window = origin.root1
             ### asigns the main window identifier to self.window
-            ### this is used to place items in the original window
+        self.local_frame = Frame(origin.disp_frame) ### creates a frame hosted the display frame of the main window
+        self.local_frame.grid(column=0) ### "packs" or "displays" frame
 
-        self.local_frame = Frame(self.window) ### creates a frame hosted the main window
-        self.local_frame.grid() ### "packs" or displays frame
-
-        self.get_files()
+        if self.origin.tf_active:
+            return
+        elif self.origin.df_active:
+            return
+        else:
+            self.origin.df_active = True
+            print('tf set true')
+            self.select_files()
 
         return
 
-    def get_files(self):
+    def select_files(self):
         label = Label(self.local_frame, text="this is the local frame").grid(row=0, column=0, columnspan=3)
 
-        U_input_enter = Button(self.local_frame, text="enter")
-        U_input_enter.grid(row=2, column=2)
-        U_input_enter.bind("<Button-1>", self.some_function)
-            ### this will bind the button to mouse button 1 (left click) and call the some_function
+        U_input_enter = Button(self.local_frame, text="File")
+        U_input_enter.grid(row=1, column=0)
+        U_input_enter.bind("<Button-1>", self.get_file_name)
+            ### this will bind the button to mouse button 1 (left click) and call the get_file_name
 
-        U_input_exit = Button(self.local_frame, text="exit")
-        U_input_exit.grid(column=2)
+        U_input_exit = Button(self.local_frame, text="Done")
+        U_input_exit.grid(row=1,column=1)
         U_input_exit.bind("<Button-1>", self.quit_loop)
 
-    def some_function(self, event=NONE):
+    def get_file_name(self, event=NONE):
         print("function has been called \n")
 
         name = askopenfilename(initialdir="C:/Users/Batman/Documents/Programming/tkinter/",
@@ -50,13 +53,15 @@ class SessionFiles:
             print("you entered: ", name)
         except:
             print("No file exists")
-        self.files.append(name)
-        print("files selected are: ", self.files)
+        self.files_list.append(name)
+        print("files selected are: ", self.files_list)
         return
 
     def quit_loop(self, event=NONE):
-        # self.local.quit()
+        self.origin.df_active = False
+        self.origin.files = self.files_list
         self.local_frame.destroy()
-        self.window.quit()
+        # self.local.quit()
+        # self.window.quit()
         # exit()
         return
