@@ -1,5 +1,5 @@
 
-
+import cv2
 from tkinter import *
 from functools import partial
 

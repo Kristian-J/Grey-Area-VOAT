@@ -42,7 +42,7 @@ class SessionFiles:
         print("function has been called \n")
 
         name = askopenfilename(initialdir="C:/Users/Batman/Documents/Programming/tkinter/",
-                               filetypes=(("Text File", "*.txt"), ("All Files", "*.*")),
+                               filetypes=(("Jpg files", "*.jpg"), ("PNG files", "*.png"), ("EPS", "*.eps"), ("All Files", "*.*")),
                                title="Choose a file."
                                )
         # print(name)
@@ -53,13 +53,21 @@ class SessionFiles:
             print("you entered: ", name)
         except:
             print("No file exists")
-        self.files_list.append(name)
+        if name in self.files_list:
+            pass
+        else:
+            self.files_list.append(name)
         print("files selected are: ", self.files_list)
         return
 
     def quit_loop(self, event=NONE):
         self.origin.df_active = False
         self.origin.files = self.files_list
+        try:
+            self.origin.tempframe2.destroy()
+        except:
+            pass
+        self.origin.disp_files()
         self.local_frame.destroy()
         # self.local.quit()
         # self.window.quit()
