@@ -4,11 +4,12 @@ import numpy as np
 cap = cv2.VideoCapture('vtest.avi')
 total_frames = cap.get(7)
 
-print(total_frames)
+# print(total_frames)
 
 cap.set(1, 200)
 ret, frame = cap.read()
 cv2.imwrite('temp.jpg', frame)
+
 img = cv2.imread('temp.jpg', 1)
 cv2.imshow('image', img)
 cv2.waitKey(0)

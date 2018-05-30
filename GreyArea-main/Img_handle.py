@@ -17,7 +17,7 @@ class Imghandler():
         img = cv2.merge((r, g, b))
         # Convert the Image object into a TkPhoto object
         im = Image.fromarray(img)
-        imgtk = ImageTk.PhotoImage(master = local_frame, image=im)
+        imgtk = ImageTk.PhotoImage(master = self.local_frame, image=im)
 
         # Put it in the display window
         label = Label(self.local_frame, image=imgtk)

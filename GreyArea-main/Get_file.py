@@ -13,7 +13,7 @@ class SessionFiles:
         self.window = origin.root1
             ### asigns the main window identifier to self.window
         self.local_frame = Frame(origin.disp_frame) ### creates a frame hosted the display frame of the main window
-        self.local_frame.grid(column=0) ### "packs" or "displays" frame
+        self.local_frame.grid(row = 0, column=0) ### "packs" or "displays" frame
 
         if self.origin.tf_active:
             return
@@ -27,7 +27,7 @@ class SessionFiles:
         return
 
     def select_files(self):
-        label = Label(self.local_frame, text="this is the local frame").grid(row=0, column=0, columnspan=3)
+        label = Label(self.local_frame, text="please select your file(s)").grid(row=0, column=0, columnspan=3)
 
         U_input_enter = Button(self.local_frame, text="File")
         U_input_enter.grid(row=1, column=0)
@@ -39,21 +39,28 @@ class SessionFiles:
         U_input_exit.bind("<Button-1>", self.quit_loop)
 
     def get_file_name(self, event=NONE):
-        print("function has been called \n")
 
-        name = askopenfilename(initialdir="C:/Users/Batman/Documents/Programming/tkinter/",
-                               filetypes=(("Jpg files", "*.jpg"), ("PNG files", "*.png"), ("EPS", "*.eps"), ("All Files", "*.*")),
-                               title="Choose a file."
-                               )
-        # print(name)
-        # Using try in case user types in unknown file or closes without choosing a file.
-        try:
+        if self.origin.ftype == "img":
+        # print("function has been called \n")
+            name = askopenfilename(initialdir="C:/Users/Batman/Documents/Programming/tkinter/",
+                                   filetypes=(("Jpg files", "*.jpg"), ("PNG files", "*.png"), ("EPS", "*.eps"), ("All Files", "*.*")),
+                                   title="Choose a file."
+                                   )
+        else:
+            name = askopenfilename(initialdir="C:/Users/Batman/Documents/Programming/tkinter/",
+                                   filetypes=(("avi files", "*.avi"), ("MP4 files", "*.mp4"), ("All Files", "*.*")),
+                                   title="Choose a file."
+                                   )
+
+        try: # Using try in case user types in unknown file or closes without choosing a file.
             # with open(name, 'r') as UseFile:
                 # print(UseFile.read())
             print("you entered: ", name)
         except:
             print("No file exists")
         if name in self.files_list:
+            pass
+        elif len(name) <3:
             pass
         else:
             self.files_list.append(name)

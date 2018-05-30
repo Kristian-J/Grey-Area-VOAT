@@ -22,7 +22,6 @@ class SessionTags:
             self.origin.tf_active = True
             print('tf set true')
             self.select_tags()
-
         return
 
     def select_tags(self):
@@ -33,7 +32,7 @@ class SessionTags:
         U_input_label.grid(row=2, column=0,)
 
         global U_input
-        U_input = Entry(self.local_frame, width=20, )
+        U_input = Entry(self.local_frame, width=20 )
         U_input.grid(row=2, column=1)
         U_input.bind("<Return>", self.add_tag)
 
