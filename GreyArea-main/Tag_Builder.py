@@ -12,7 +12,7 @@ class SessionTags:
         self.tag_list = self.origin.tags
         self.exist = False
         self.tempbutton = None
-        self.local_frame = Frame(self.origin.tags_frame)
+        self.local_frame = Frame(self.origin.disp_frame)
 
         if self.origin.tf_active:
             return
@@ -22,18 +22,17 @@ class SessionTags:
             self.origin.tf_active = True
             print('tf set true')
             self.select_tags()
-
         return
 
     def select_tags(self):
-        self.local_frame.grid(row=1, column=3)
+        self.local_frame.grid(row=0, column=0)
         Label(self.local_frame, text="Please specify you're object tags").grid(row=0, column=0, columnspan=2)
 
         U_input_label = Label(self.local_frame, text="Enter tag")
         U_input_label.grid(row=2, column=0,)
 
         global U_input
-        U_input = Entry(self.local_frame, width=20, )
+        U_input = Entry(self.local_frame, width=20 )
         U_input.grid(row=2, column=1)
         U_input.bind("<Return>", self.add_tag)
 
@@ -62,6 +61,11 @@ class SessionTags:
         self.origin.tf_active = False
         print('tf set false')
         self.origin.tags = self.tag_list
+        try:
+            self.origin.tempframe1.destroy()
+        except:
+            pass
+        self.origin.disp_tags()
         self.local_frame.destroy()
         # self.origin.session_files = SessionFiles(self.origin)
         # self.window.quit()

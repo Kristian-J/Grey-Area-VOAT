@@ -5,35 +5,46 @@ from tkinter import *
 from tkinter import ttk
 from Tag_Builder import *
 from module_template import *
+from Vid_Handle import *
+from Img_handle import *
 
 class Controller:
-    def __init__(self):
+    def __init__(self, ftype):
         # global session
-        self.var = None
-        self.files=[]
+        self.ftype = ftype
+        self.cnt_vid = None
+
+        self.files =[]
         self.session_tags = None ### for storing the instance of SessionTags
-        self.tags=[]
+        self.tags =[]
         self.session_files = None ### for storing the instance of SessionFiles
         ### creating the main window ###
         self.root1 = Tk()
         self.root1.title("Welcome")
-        self.root1.geometry("1500x800")
+        self.root1.geometry("1400x900")
         ### setting the structure for the window and component elements ###
         self.tags_frame = Frame(self.root1)
-        self.tags_frame.grid(row=3, column=0, rowspan= 4, columnspan = 1, sticky=N)
+        self.tags_frame.grid(row=2, column=0, rowspan= 4, columnspan = 1, sticky=N)
         self.tf_active = False
+        ### frame for displaying file name buttons
+        self.files_frame = Frame(self.root1)
+        self.files_frame.grid(row=0, column=11, rowspan= 10, columnspan = 1, sticky=N)
+        self.ff_active = False
+        ### frame for main display
         self.disp_frame = Frame(self.root1)
-        self.disp_frame.grid(row=0, column=1, rowspan= 7, columnspan = 10,sticky=NE)
+        self.disp_frame.grid(row=0, column=1, rowspan= 7, columnspan = 9,sticky=NE)
         self.df_active = False
+        ### frame for positioning the video controls
         self.controls_frame = Frame(self.root1)
-        self.controls_frame.grid(row=7, column=1,  columnspan = 10, sticky=NE)
+        self.controls_frame.grid(row=7, column=1,  columnspan = 9, sticky=NE)
         self.cf_active = False
+
 
 
 
         # Menu Bar
         self.menu_frame = Frame(self.root1)
-        self.menu_frame.grid(row=1, column=0, rowspan= 2,sticky=N)
+        self.menu_frame.grid(row=0, column=0, rowspan= 2,sticky=N)
 
         menu = Menu(self.root1)
         self.root1.config(menu=menu)
@@ -67,6 +78,66 @@ class Controller:
         print('these are the current files', self.files)
         return
 
+    def disp_tags(self):
+        self.tempframe1 = Frame(self.tags_frame)
+        self.tempframe1.grid()
+        if len(self.tags) > 0:
+            for i in self.tags:
+                self.tempbutton = Button(self.tempframe1, text=i ,width=15)
+                self.tempbutton.grid(sticky=N)
+
+    def disp_files(self):
+        self.tempframe2 = Frame(self.files_frame)
+        self.tempframe2.grid(sticky=N)
+        if len(self.files) > 0:
+            if self.ftype == 'img':
+                for i in self.files:
+                    self.tempbutton = Button(self.tempframe2, text=i ,width=20, command = partial(self.disp_img, i))
+                    self.tempbutton.grid(column=0)
+            else:
+                for i in self.files:
+                    self.tempbutton = Button(self.tempframe2, text=i ,width=20, command = partial(self.disp_vid, i))
+                    self.tempbutton.grid(column=0)
+
+    def disp_vid(self, fname):
+        try:
+            self.video_disp.local_frame.destroy()
+        except:
+            pass
+        self.cnt_vid = fname
+        self.video_disp = VidHandler(self)
+        return
+    def disp_img(self, fname):
+        try:
+            self.local_frame.destroy()
+        except:
+            pass
+        filename = fname
+        self.local_frame= Frame(self.disp_frame)
+        self.local_frame.grid()
+        self.image_name = fname
+
+        image = cv2.imread(self.image_name) ### imports the image
+
+        # Rearrange the color channel
+        b, g, r = cv2.split(image)
+        img = cv2.merge((r, g, b))
+        # Convert the Image object into a TkPhoto object
+        img = Image.fromarray(img)
+
+        basewidth = 1100  ### sets control on image size, with aspect ratio intact
+        wpercent = (basewidth / float(img.size[0]))
+        hsize = int((float(img.size[1]) * float(wpercent)))
+        im = img.resize((basewidth, hsize), Image.ANTIALIAS)
+
+        imgtk = ImageTk.PhotoImage(master = self.local_frame, image=im)
+
+        # Put it in the display window
+        label = Label(self.local_frame, image=imgtk)
+        label.image = imgtk
+        label.grid()
+        return
+
 class GetType():
     def __init__(self):
         print("this it the type control")
@@ -76,29 +147,27 @@ class GetType():
         self.frame = Frame(self.root0)
         self.frame.grid(row = 0, column = 0)
         Label(self.frame, text="Are you working with image or video files today?").grid(row=0, column=0, columnspan=2)
+
         button1 = Button(self.frame, width=20, height=5, text="Image")
         button1.grid(row=1, column=0, sticky=N)
         button1.bind("<Button-1>", self.ftypeim)
-        # button1.bind("<ButtonRelease-1>", self.quit_loop)
 
         button2 = Button(self.frame, width=20, height=5, text="Video")
         button2.grid(row=1, column=1, sticky=N)
         button2.bind("<Button-1>", self.ftypevid)
-        # button2.bind("<Button-1>", self.quit_loop())
 
         self.root0.mainloop()
-
-
     def ftypeim(self, event=NONE):
         self.response = "img"
-        print("img?")
+        # print("img?")
         self.quit_loop()
     def ftypevid(self, event=NONE):
         self.response = "vid"
-        print("vid?")
+        # print("vid?")
         self.quit_loop()
 
     def quit_loop(self, event=NONE):
+        self.root0.withdraw()
         self.frame.destroy()
         self.root0.quit()
         return
@@ -106,11 +175,11 @@ class GetType():
 
 
 f_type = GetType()
-
-primary = Controller()
+control_type = f_type.response
+print(control_type)
+primary = Controller(control_type)
 # session_tags = primary.session_tags
 # session_tags = SessionTags(primary)
-
 
 primary.root1.mainloop()
 
