@@ -7,21 +7,31 @@ from Tag_Builder import *
 from module_template import *
 from Vid_Handle import *
 from Img_handle import *
+from functools import partial
 
 class Controller:
     def __init__(self, ftype):
-        # global session
         self.ftype = ftype
         self.cnt_vid = None
 
-        self.files =[]
+        self.files =[]  ### list of current filenames
         self.session_tags = None ### for storing the instance of SessionTags
-        self.tags =[]
+        self.tags =[]  ### list of current tags
         self.session_files = None ### for storing the instance of SessionFiles
+        self.image_name = None
         ### creating the main window ###
-        self.root1 = Tk()
+        self.root1 = Tk() ### creating main window
         self.root1.title("Welcome")
         self.root1.geometry("1400x900")
+        ### variables for storing ROI information
+        self.temp_start_x = None
+        self.temp_start_y = None
+        self.temp_end_x = None
+        self.temp_end_y = None
+        self.temp_obj = []
+        self.vis_objects = []
+
+        # print(self.root1.winfo_pointerxy())
         ### setting the structure for the window and component elements ###
         self.tags_frame = Frame(self.root1)
         self.tags_frame.grid(row=2, column=0, rowspan= 4, columnspan = 1, sticky=N)
@@ -112,12 +122,16 @@ class Controller:
             self.local_frame.destroy()
         except:
             pass
-        filename = fname
         self.local_frame= Frame(self.disp_frame)
         self.local_frame.grid()
         self.image_name = fname
 
         image = cv2.imread(self.image_name) ### imports the image
+        if self.temp_end_x is not None:
+            cv2.rectangle(image, (self.temp_start_x, self.temp_start_y), (self.temp_end_x, self.temp_end_y),(0, 255, 0), 4)
+            # cv2.imshow('image', image)
+            # cv2.waitkey(0)
+            # cv2.destroyAllWindows()
 
         # Rearrange the color channel
         b, g, r = cv2.split(image)
@@ -136,6 +150,30 @@ class Controller:
         label = Label(self.local_frame, image=imgtk)
         label.image = imgtk
         label.grid()
+        label.bind("<Button-1>", self.bind1 )
+        label.bind("<B1-Motion>", self.bind2 )
+        label.bind("<ButtonRelease-1>", self.bind3 )
+
+
+
+        return
+
+    def bind1(self, event):
+        print('at bind1', event.x, event.y)
+        # print('at bind1', self.local_frame.winfo_pointerxy())
+        self.temp_start_x = event.x
+        self.temp_start_y = event.y
+        return
+    def bind2(self, event):
+        self.temp_end_x = event.x
+        self.temp_end_y = event.y
+        print('at bind2',self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y)
+        return
+    def bind3(self, event):
+        self.temp_end_x = event.x
+        self.temp_end_y = event.y
+        print('at bind3',self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y)
+        self.disp_img(self.image_name)
         return
 
 class GetType():
