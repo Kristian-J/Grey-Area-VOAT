@@ -23,34 +23,39 @@ class Controller:
         self.root1 = Tk() ### creating main window
         self.root1.title("Welcome")
         self.root1.geometry("1400x900")
-        ### variables for storing ROI information
+
+        ### variables for storing new ROI information
         self.temp_start_x = None
         self.temp_start_y = None
         self.temp_end_x = None
         self.temp_end_y = None
-        self.temp_obj = []
+        self.temp_obj_tags = []
+        self.temp_obj = None
+
         self.vis_objects = []
+
+        self.scale_ratio = 1
 
         # print(self.root1.winfo_pointerxy())
         ### setting the structure for the window and component elements ###
         self.tags_frame = Frame(self.root1)
         self.tags_frame.grid(row=2, column=0, rowspan= 4, columnspan = 1, sticky=N)
         self.tf_active = False
+
         ### frame for displaying file name buttons
         self.files_frame = Frame(self.root1)
         self.files_frame.grid(row=0, column=11, rowspan= 10, columnspan = 1, sticky=N)
         self.ff_active = False
+
         ### frame for main display
         self.disp_frame = Frame(self.root1)
         self.disp_frame.grid(row=0, column=1, rowspan= 7, columnspan = 9,sticky=NE)
         self.df_active = False
+
         ### frame for positioning the video controls
         self.controls_frame = Frame(self.root1)
         self.controls_frame.grid(row=7, column=1,  columnspan = 9, sticky=NE)
         self.cf_active = False
-
-
-
 
         # Menu Bar
         self.menu_frame = Frame(self.root1)
@@ -71,12 +76,6 @@ class Controller:
         button4 = Button(self.menu_frame, width=15, text="Select File")
         button4.grid(row=2, column=1, sticky=N)
         button4.bind("<Button-1>", self.get_files)
-
-        # self.testcall = Xxxxx(self)
-                ### this is an example external funtion/class call
-                ### refer to module_template.py
-                ### passes self (this instance of Controller)
-        # self.root1.mainloop()
         return
 
     def get_tags(self, event=NONE):
@@ -93,7 +92,7 @@ class Controller:
         self.tempframe1.grid()
         if len(self.tags) > 0:
             for i in self.tags:
-                self.tempbutton = Button(self.tempframe1, text=i ,width=15)
+                self.tempbutton = Button(self.tempframe1, text=i ,width=15, command = partial(self.disp_obj_tag, i))
                 self.tempbutton.grid(sticky=N)
 
     def disp_files(self):
@@ -102,12 +101,17 @@ class Controller:
         if len(self.files) > 0:
             if self.ftype == 'img':
                 for i in self.files:
-                    self.tempbutton = Button(self.tempframe2, text=i ,width=20, command = partial(self.disp_img, i))
+                    self.tempbutton = Button(self.tempframe2, text=i ,width=20, command = partial(self.img_call, i))
                     self.tempbutton.grid(column=0)
             else:
                 for i in self.files:
                     self.tempbutton = Button(self.tempframe2, text=i ,width=20, command = partial(self.disp_vid, i))
                     self.tempbutton.grid(column=0)
+
+    def img_call(self, fname):
+        self.reset_temp_obj()
+        self.vis_objects = []
+        self.disp_img(fname)
 
     def disp_vid(self, fname):
         try:
@@ -127,11 +131,16 @@ class Controller:
         self.image_name = fname
 
         image = cv2.imread(self.image_name) ### imports the image
-        if self.temp_end_x is not None:
-            cv2.rectangle(image, (self.temp_start_x, self.temp_start_y), (self.temp_end_x, self.temp_end_y),(0, 255, 0), 4)
-            # cv2.imshow('image', image)
-            # cv2.waitkey(0)
-            # cv2.destroyAllWindows()
+        if self.temp_end_x is not None and self.temp_start_x is not None:
+            cv2.rectangle(image, (self.temp_start_x, self.temp_start_y), (self.temp_end_x, self.temp_end_y),(0, 0, 255), 4)
+        if len(self.vis_objects)>=1:
+            # print(self.vis_objects, len(self.vis_objects))
+            for i in self.vis_objects:
+                print(i)
+                coords = i[0]
+                print("visobj coords: ", coords)
+                cv2.rectangle(image, (coords[0], coords[1]), (coords[2], coords[3]),(200, 0, 0), 4)
+                print("visobj coords: ", coords)
 
         # Rearrange the color channel
         b, g, r = cv2.split(image)
@@ -140,41 +149,116 @@ class Controller:
         img = Image.fromarray(img)
 
         basewidth = 1100  ### sets control on image size, with aspect ratio intact
-        wpercent = (basewidth / float(img.size[0]))
+        wpercent = (basewidth / float(img.size[0])) ### image scale ratio
+        self.scale_ratio = wpercent
         hsize = int((float(img.size[1]) * float(wpercent)))
         im = img.resize((basewidth, hsize), Image.ANTIALIAS)
-
+        print("image size debug", 'hight is- ', hsize, 'percent is- ', wpercent)
         imgtk = ImageTk.PhotoImage(master = self.local_frame, image=im)
 
         # Put it in the display window
         label = Label(self.local_frame, image=imgtk)
         label.image = imgtk
         label.grid()
-        label.bind("<Button-1>", self.bind1 )
-        label.bind("<B1-Motion>", self.bind2 )
-        label.bind("<ButtonRelease-1>", self.bind3 )
 
-
+        ### image event handling
+        label.bind("<Button-1>", self.bind_click )
+        # label.bind("<B1-Motion>", self.bind2 )
+        label.bind("<ButtonRelease-1>", self.bind_release )
+        # label.bind("<Return>")
+        # label.bind("<Leave>")
+        self.root1.bind("<KeyPress>",self.keybind)
 
         return
-
-    def bind1(self, event):
+    ### image event handling functions
+    def bind_click(self, event): ### ROI mouse click event manager
         print('at bind1', event.x, event.y)
-        # print('at bind1', self.local_frame.winfo_pointerxy())
-        self.temp_start_x = event.x
-        self.temp_start_y = event.y
+        self.temp_start_x = int(event.x//self.scale_ratio)
+        self.temp_start_y = int(event.y//self.scale_ratio)
+        print('at bind1', self.temp_start_x, self.temp_start_y)
         return
     def bind2(self, event):
-        self.temp_end_x = event.x
-        self.temp_end_y = event.y
-        print('at bind2',self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y)
+        self.temp_end_x = int(event.x//self.scale_ratio)
+        self.temp_end_y = int(event.y//self.scale_ratio)
+        # print('at bind2',self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y)
         return
-    def bind3(self, event):
-        self.temp_end_x = event.x
-        self.temp_end_y = event.y
+    def bind_release(self, event): ### ROI mouse release event manager
+        self.temp_end_x = int(event.x//self.scale_ratio)
+        self.temp_end_y = int(event.y//self.scale_ratio)
         print('at bind3',self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y)
         self.disp_img(self.image_name)
+        # self.temp_obj[0] = [self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y] ### redundant
+        # print("tempobj = ",self.temp_obj)
+
+    def keybind(self, event): ### image interaction Hotkey handler
+        item = event.char
+        if item.isalpha():
+            pass
+        else:
+            return
+        print(item.isalpha())
+        print(">",item,"<")
+        if item in ("s","S"):
+            print('key is s')
+            if self.temp_start_x is not None and self.temp_end_x is not None and len(self.temp_obj_tags) >=1 :
+                self.temp_obj = [[self.temp_start_x, self.temp_start_y,self.temp_end_x,self.temp_end_y],self.temp_obj_tags]
+                self.vis_objects.append(self.temp_obj)
+                self.reset_temp_obj()
+            # print('temp_obj', self.temp_obj)
+            # print("vis_objects", self.vis_objects)
+            # if len(self.temp_obj_tags) <= 0:
+            #     print("error 3")
+            # else:
+            #     local = [self.temp_start_x, self.temp_start_y,self.temp_end_x,self.temp_end_y  ]
+            #     print(local)
         return
+
+    def disp_obj_tag(self, i):
+        counter = 0
+        if self.temp_start_x is None:
+            return
+        elif i is None:
+            pass
+        elif i not in self.temp_obj_tags:
+            self.temp_obj_tags.append(i)
+        try:
+            self.tempframe3.destroy()
+        except:
+            print('failed to destroy')
+        self.tempframe3 = Frame(self.root1)
+        self.tempframe3.grid(row=8, column=1,  columnspan = 9, sticky=NE)
+        # print('test deliver tags', self.temp_obj_tags, len(self.temp_obj_tags))
+        if len(self.tags) > 0:
+            for i in self.temp_obj_tags:
+                print(i)
+                counter+=1
+                self.tempbutton = Button(self.tempframe3, text=i, width=15, command = partial(self.del_obj_tag, i))
+                self.tempbutton.grid(row = 0, column = counter, sticky=N)
+    def del_obj_tag(self, i):
+        # counter = 0
+        for item in self.temp_obj_tags:
+            if item == i:
+                # print(i, item, counter)
+                self.temp_obj_tags.remove(item)
+                self.disp_obj_tag(None)
+                return
+            else:
+                pass
+            # counter += 1
+
+    def reset_temp_obj(self):
+        self.temp_start_x = None
+        self.temp_start_y = None
+        self.temp_end_x = None
+        self.temp_end_y = None
+        self.temp_obj_tags = []
+        self.temp_obj = None
+        try:
+            self.tempframe3.destroy()
+        except:
+            pass
+        return
+
 
 class GetType():
     def __init__(self):
@@ -213,6 +297,8 @@ class GetType():
 
 
 f_type = GetType()
+while f_type.response == None:
+    f_type = GetType()
 control_type = f_type.response
 print(control_type)
 primary = Controller(control_type)
