@@ -4,6 +4,7 @@
 from tkinter import *
 from tkinter import ttk
 from Tag_Builder import *
+from Visual_object import *
 from module_template import *
 from Vid_Handle import *
 from Img_handle import *
@@ -24,16 +25,35 @@ class Controller:
         self.root1.title("Welcome")
         self.root1.geometry("1400x900")
 
-        ### variables for storing new ROI information
+        ### variables for handling ROI information
         self.temp_start_x = None
         self.temp_start_y = None
         self.temp_end_x = None
         self.temp_end_y = None
-        self.temp_obj_tags = []
+        self.temp_tags = []
         self.temp_obj = None
+
+        self.new_start_x = None
+        self.new_start_y = None
+        self.new_end_x = None
+        self.new_end_y = None
+        # self.new_obj_tags = []
+        self.new_obj = None
+
+        # self.active_start_x = None
+        # self.active_start_y = None
+        # self.active_end_x = None
+        # self.active_end_y = None
+        # self.active_obj_tags = []
+        self.active_obj = None
+        self.active_flag = False
 
         self.vis_objects = []
 
+        self.point_x = None
+        self.point_y = None
+
+        ### variable for holding image scale ratio for ROI scaling.
         self.scale_ratio = 1
 
         # print(self.root1.winfo_pointerxy())
@@ -56,6 +76,10 @@ class Controller:
         self.controls_frame = Frame(self.root1)
         self.controls_frame.grid(row=7, column=1,  columnspan = 9, sticky=NE)
         self.cf_active = False
+
+        ### frame for displaying object tags
+        self.obj_tags_frame = Frame(self.root1)
+        self.obj_tags_frame.grid(row=8, column=1,  columnspan = 9, sticky=NE)
 
         # Menu Bar
         self.menu_frame = Frame(self.root1)
@@ -87,12 +111,12 @@ class Controller:
         print('these are the current files', self.files)
         return
 
-    def disp_tags(self):
+    def disp_tags(self): ### displays general tag list as buttons
         self.tempframe1 = Frame(self.tags_frame)
         self.tempframe1.grid()
         if len(self.tags) > 0:
             for i in self.tags:
-                self.tempbutton = Button(self.tempframe1, text=i ,width=15, command = partial(self.disp_obj_tag, i))
+                self.tempbutton = Button(self.tempframe1, text=i ,width=15, command = partial(self.add_temp_tag, i))
                 self.tempbutton.grid(sticky=N)
 
     def disp_files(self):
@@ -125,22 +149,32 @@ class Controller:
         try:
             self.local_frame.destroy()
         except:
+            print("could not destroy local_frame")
             pass
-        self.local_frame= Frame(self.disp_frame)
+        self.local_frame = Frame(self.disp_frame)
         self.local_frame.grid()
         self.image_name = fname
 
         image = cv2.imread(self.image_name) ### imports the image
-        if self.temp_end_x is not None and self.temp_start_x is not None:
-            cv2.rectangle(image, (self.temp_start_x, self.temp_start_y), (self.temp_end_x, self.temp_end_y),(0, 0, 255), 4)
+        if self.new_start_x is not None and self.new_end_x is not None:
+            cv2.rectangle(image, (self.new_start_x, self.new_start_y), (self.new_end_x, self.new_end_y),(0, 0, 255), 4)
         if len(self.vis_objects)>=1:
             # print(self.vis_objects, len(self.vis_objects))
             for i in self.vis_objects:
-                print(i)
-                coords = i[0]
-                print("visobj coords: ", coords)
-                cv2.rectangle(image, (coords[0], coords[1]), (coords[2], coords[3]),(200, 0, 0), 4)
-                print("visobj coords: ", coords)
+                coords = i.obj_location
+                print(i, i.active, i.obj_location, i.obj_tags)
+                try:
+                    i.local_frame.destroy()
+                    self.tempframe3.destroy()
+                except:
+                    pass
+                if i.active == True:
+                    cv2.rectangle(image, (coords[0], coords[1]), (coords[2], coords[3]),(0, 200, 0), 4)
+                    i.disp_tags()
+                else:
+                    cv2.rectangle(image, (coords[0], coords[1]), (coords[2], coords[3]),(200, 0, 0), 4)
+            print(self.vis_objects)
+            # print("visobj coords: ", coords)
 
         # Rearrange the color channel
         b, g, r = cv2.split(image)
@@ -185,8 +219,10 @@ class Controller:
     def bind_release(self, event): ### ROI mouse release event manager
         self.temp_end_x = int(event.x//self.scale_ratio)
         self.temp_end_y = int(event.y//self.scale_ratio)
-        print('at bind3',self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y)
-        self.disp_img(self.image_name)
+        print('at bind3',self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y, self.image_name)
+        # self.disp_img(self.image_name)
+        self.coord_validate(self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y)
+
         # self.temp_obj[0] = [self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y] ### redundant
         # print("tempobj = ",self.temp_obj)
 
@@ -200,64 +236,135 @@ class Controller:
         print(">",item,"<")
         if item in ("s","S"):
             print('key is s')
-            if self.temp_start_x is not None and self.temp_end_x is not None and len(self.temp_obj_tags) >=1 :
-                self.temp_obj = [[self.temp_start_x, self.temp_start_y,self.temp_end_x,self.temp_end_y],self.temp_obj_tags]
-                self.vis_objects.append(self.temp_obj)
+            if self.temp_start_x is not None and self.temp_end_x is not None and len(self.temp_tags) >=1 :
+
+                self.temp_obj = [self.temp_start_x, self.temp_start_y,self.temp_end_x,self.temp_end_y]
+                self.new_obj = VisualObject(self.temp_obj, self.temp_tags, self.obj_tags_frame)
+                # print("this is the oject: ", self.new_obj)
+                if len(self.vis_objects) >= 1:
+                    for i in self.vis_objects:
+                        i.active = False
+                self.new_obj.active = True
+                self.vis_objects.append(self.new_obj)
                 self.reset_temp_obj()
+                self.disp_img(self.image_name)
+
             # print('temp_obj', self.temp_obj)
             # print("vis_objects", self.vis_objects)
-            # if len(self.temp_obj_tags) <= 0:
+            # if len(self.temp_tags) <= 0:
             #     print("error 3")
             # else:
             #     local = [self.temp_start_x, self.temp_start_y,self.temp_end_x,self.temp_end_y  ]
             #     print(local)
         return
 
-    def disp_obj_tag(self, i):
-        counter = 0
-        if self.temp_start_x is None:
-            return
-        elif i is None:
-            pass
-        elif i not in self.temp_obj_tags:
-            self.temp_obj_tags.append(i)
+    def add_temp_tag(self, i):
+        if self.active_flag:
+            print("flag is active")
+            for obj in self.vis_objects:
+                if obj.active:
+                    obj.add_tag(i)
+        else:
+            if self.temp_start_x is None or self.temp_end_x is None:
+                return
+            elif i is None:
+                pass
+            elif i not in self.temp_tags:
+                self.temp_tags.append(i)
+            self.disp_temp_tags()
+
+    def disp_temp_tags(self):
         try:
             self.tempframe3.destroy()
         except:
             print('failed to destroy')
-        self.tempframe3 = Frame(self.root1)
-        self.tempframe3.grid(row=8, column=1,  columnspan = 9, sticky=NE)
-        # print('test deliver tags', self.temp_obj_tags, len(self.temp_obj_tags))
-        if len(self.tags) > 0:
-            for i in self.temp_obj_tags:
+        self.tempframe3 = Frame(self.obj_tags_frame)
+        self.tempframe3.grid()
+
+        counter = 0
+        if len(self.tags) >= 1:
+            for i in self.temp_tags:
                 print(i)
                 counter+=1
                 self.tempbutton = Button(self.tempframe3, text=i, width=15, command = partial(self.del_obj_tag, i))
                 self.tempbutton.grid(row = 0, column = counter, sticky=N)
+
     def del_obj_tag(self, i):
         # counter = 0
-        for item in self.temp_obj_tags:
+        for item in self.temp_tags:
             if item == i:
                 # print(i, item, counter)
-                self.temp_obj_tags.remove(item)
-                self.disp_obj_tag(None)
+                self.temp_tags.remove(item)
+                self.disp_temp_tags()
                 return
             else:
                 pass
             # counter += 1
+
+    def coord_validate(self, p1x, p1y, p2x, p2y):
+        if abs(p1x - p2x)< 10 and abs(p1y - p2y)< 10:
+            print(abs(p1x - p2x))
+            self.point_x = p1x
+            self.point_y = p1y
+            """need to add conditional check. if temp_tags is not empty, and a new (unsaved) ROI exists or active object has been modified, check if user wants to save the object """
+            self.reset_temp_obj()
+            self.reset_new_obj()
+            point = [self.point_x, self.point_y]
+            print("coord val debug - vis-objs: ", self.vis_objects)
+            if len(self.vis_objects) >=1:
+                flag = False
+                for o in self.vis_objects:
+                    # print('object: ', i)
+                    if o.check_inside([self.point_x, self.point_y]):
+                        if o.active:
+                            o.active = False
+                        else:
+                            if not flag:
+                                o.active = True
+                                flag = True
+                    else:
+                        o.active = False
+                if flag:
+                    self.active_flag = True
+                else:
+                    self.active_flag = False
+
+            self.disp_img(self.image_name)
+
+
+        elif abs(p1x - p2x)< 10 and abs(p1y - p2y)> 10 or abs(p1x - p2x)> 10 and abs(p1y - p2y)< 10 :
+            print("invalid ROI")
+            ### invalid ROI
+            return
+        else:
+            self.new_start_x = p1x
+            self.new_start_y = p1y
+            self.new_end_x = p2x
+            self.new_end_y = p2y
+            for i in self.vis_objects:
+                i.active = False
+            self.disp_img(self.image_name)
+            print("new coordinates are", self.new_start_x, self.new_start_y, self.new_end_x, self.new_end_y)
+
 
     def reset_temp_obj(self):
         self.temp_start_x = None
         self.temp_start_y = None
         self.temp_end_x = None
         self.temp_end_y = None
-        self.temp_obj_tags = []
+        self.temp_tags = []
         self.temp_obj = None
         try:
             self.tempframe3.destroy()
         except:
             pass
         return
+
+    def reset_new_obj(self):
+        self.new_start_x = None
+        self.new_start_y = None
+        self.new_end_x = None
+        self.new_end_y = None
 
 
 class GetType():
