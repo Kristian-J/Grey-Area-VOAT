@@ -202,6 +202,7 @@ class Controller:
         # label.bind("<Return>")
         # label.bind("<Leave>")
         self.root1.bind("<KeyPress>",self.keybind)
+        self.root1.bind("<BackSpace>", self.bind_backSpace)
 
         return
     ### image event handling functions
@@ -225,6 +226,23 @@ class Controller:
 
         # self.temp_obj[0] = [self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y] ### redundant
         # print("tempobj = ",self.temp_obj)
+    def bind_backSpace(self,event):
+        print('backspace was pressed')
+        for i in self.vis_objects:
+            if i.active:
+                confirm = user_confirm("do you want to remove this object?").response
+                if confirm:
+                    self.vis_objects.remove(i)
+                    try:
+                        i.local_frame.destroy()
+                    except:
+                        pass
+                    self.disp_img(self.image_name)
+                    self.active_flag = False
+                    print("object should have been removed")
+                    return
+                else:
+                    return
 
     def keybind(self, event): ### image interaction Hotkey handler
         item = event.char
@@ -245,6 +263,7 @@ class Controller:
                     for i in self.vis_objects:
                         i.active = False
                 self.new_obj.active = True
+                self.active_flag = True
                 self.vis_objects.append(self.new_obj)
                 self.reset_temp_obj()
                 self.disp_img(self.image_name)
@@ -334,6 +353,9 @@ class Controller:
 
         elif abs(p1x - p2x)< 10 and abs(p1y - p2y)> 10 or abs(p1x - p2x)> 10 and abs(p1y - p2y)< 10 :
             print("invalid ROI")
+            self.reset_temp_obj()
+            self.reset_new_obj()
+            self.active_flag = False
             ### invalid ROI
             return
         else:
@@ -343,6 +365,7 @@ class Controller:
             self.new_end_y = p2y
             for i in self.vis_objects:
                 i.active = False
+            self.active_flag = False
             self.disp_img(self.image_name)
             print("new coordinates are", self.new_start_x, self.new_start_y, self.new_end_x, self.new_end_y)
 
@@ -401,7 +424,27 @@ class GetType():
         self.root0.quit()
         return
 
+class user_confirm():
+    def __init__(self, string):
+        self.question = string
+        self.response = None
+        self.local_root1 = Tk()
+        self.local_root1.title("Welcome")
+        self.local_root1.geometry("300x300")
+        label = Label(self.local_root1, text=self.question).grid(row=0, column=0, columnspan=2)
+        self.positive = Button(self.local_root1, width=20, height=5, text="Continue", command = partial(self.assign_response, True))
+        self.positive.grid(row=1, column=0, sticky=N)
 
+        self.negative = Button(self.local_root1, width=20, height=5, text="Cancel", command = partial(self.assign_response, False))
+        self.negative.grid(row=1, column=1, sticky=N)
+        self.local_root1.mainloop()
+    def assign_response(self, response, event=NONE):
+        self.response = response
+        print("the user response is: ", self.response)
+        self.quit_loop()
+    def quit_loop(self, event=NONE):
+        self.local_root1.withdraw()
+        self.local_root1.quit()
 
 f_type = GetType()
 while f_type.response == None:
