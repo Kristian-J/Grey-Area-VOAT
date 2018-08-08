@@ -14,6 +14,8 @@ class SessionTags:
         self.tempbutton = None
         self.local_frame = Frame(self.origin.disp_frame)
 
+        if len(self.origin.tags) >=1:
+            self.dis_tags()
         if self.origin.tf_active:
             return
         elif self.origin.df_active:
@@ -41,7 +43,7 @@ class SessionTags:
         U_input_enter.bind("<Button-1>", self.add_tag)
 
         U_input_exit = Button(self.local_frame, text="Done")
-        U_input_exit.grid(column=2)
+        U_input_exit.grid(row= 3,column=2, sticky = N)
         U_input_exit.bind("<Button-1>", self.quit_loop)
 
     def add_tag(self, event=NONE):
@@ -50,7 +52,10 @@ class SessionTags:
         print(tag)
         if len(tag) == 0:
             return
-        self.tag_list.append(tag)
+        if tag in self.tag_list:
+            pass
+        else:
+            self.tag_list.append(tag)
         print(self.tag_list)
         U_input.delete(0, "end")
         self.dis_tags()
@@ -90,7 +95,7 @@ class SessionTags:
             self.frame1.destroy()
             print('destroyed')
         self.frame1=Frame(self.local_frame)
-        self.frame1.grid(column=1)
+        self.frame1.grid(row = 3, column=1)
         for i in self.tag_list:
             self.tempbutton = Button(self.frame1, text=i ,width=20, command = partial(self.del_button, i))
             self.tempbutton.grid(column=1)
