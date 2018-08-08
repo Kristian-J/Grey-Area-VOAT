@@ -5,6 +5,7 @@ from tkinter import *
 from tkinter import ttk
 from Tag_Builder import *
 from Visual_object import *
+from SaveData import *
 from module_template import *
 from Vid_Handle import *
 from Img_handle import *
@@ -26,26 +27,20 @@ class Controller:
         self.root1.geometry("1400x900")
 
         ### variables for handling ROI information
-        self.temp_start_x = None
+        self.temp_start_x = None ### temp coords of newly drawn/ currently being drawn ROI
         self.temp_start_y = None
         self.temp_end_x = None
         self.temp_end_y = None
-        self.temp_tags = []
-        self.temp_obj = None
+        self.temp_tag = None ### holds tag of temp object that is yet to be saved as an object
+        self.temp_obj = None ### holds temp ROI coordinates
 
-        self.new_start_x = None
+        self.new_start_x = None ### holds validated new ROI
         self.new_start_y = None
         self.new_end_x = None
         self.new_end_y = None
-        # self.new_obj_tags = []
-        self.new_obj = None
+        self.new_obj = None ### Holds newly created single visual object
 
-        # self.active_start_x = None
-        # self.active_start_y = None
-        # self.active_end_x = None
-        # self.active_end_y = None
-        # self.active_obj_tags = []
-        self.active_obj = None
+        # self.active_obj = None
         self.active_flag = False
 
         self.vis_objects = []
@@ -133,9 +128,17 @@ class Controller:
                     self.tempbutton.grid(column=0)
 
     def img_call(self, fname):
+        if len(self.vis_objects) >= 1:
+            SaveToFile(self.vis_objects, fname, None)
+
         self.reset_temp_obj()
+        self.reset_new_obj()
         self.vis_objects = []
         self.disp_img(fname)
+        try:
+            self.tempframe3.destroy()
+        except:
+            pass
 
     def disp_vid(self, fname):
         try:
@@ -145,6 +148,7 @@ class Controller:
         self.cnt_vid = fname
         self.video_disp = VidHandler(self)
         return
+
     def disp_img(self, fname):
         try:
             self.local_frame.destroy()
@@ -162,7 +166,7 @@ class Controller:
             # print(self.vis_objects, len(self.vis_objects))
             for i in self.vis_objects:
                 coords = i.obj_location
-                print(i, i.active, i.obj_location, i.obj_tags)
+                print(i, i.active, i.obj_location, i.obj_tag)
                 try:
                     i.local_frame.destroy()
                     self.tempframe3.destroy()
@@ -170,7 +174,7 @@ class Controller:
                     pass
                 if i.active == True:
                     cv2.rectangle(image, (coords[0], coords[1]), (coords[2], coords[3]),(0, 200, 0), 4)
-                    i.disp_tags()
+                    i.disp_tag()
                 else:
                     cv2.rectangle(image, (coords[0], coords[1]), (coords[2], coords[3]),(200, 0, 0), 4)
             print(self.vis_objects)
@@ -254,10 +258,9 @@ class Controller:
         print(">",item,"<")
         if item in ("s","S"):
             print('key is s')
-            if self.temp_start_x is not None and self.temp_end_x is not None and len(self.temp_tags) >=1 :
-
+            if self.temp_start_x is not None and self.temp_end_x is not None and self.temp_tag is not None :
                 self.temp_obj = [self.temp_start_x, self.temp_start_y,self.temp_end_x,self.temp_end_y]
-                self.new_obj = VisualObject(self.temp_obj, self.temp_tags, self.obj_tags_frame)
+                self.new_obj = VisualObject(self.temp_obj, self.temp_tag, self.obj_tags_frame)
                 # print("this is the oject: ", self.new_obj)
                 if len(self.vis_objects) >= 1:
                     for i in self.vis_objects:
@@ -270,11 +273,6 @@ class Controller:
 
             # print('temp_obj', self.temp_obj)
             # print("vis_objects", self.vis_objects)
-            # if len(self.temp_tags) <= 0:
-            #     print("error 3")
-            # else:
-            #     local = [self.temp_start_x, self.temp_start_y,self.temp_end_x,self.temp_end_y  ]
-            #     print(local)
         return
 
     def add_temp_tag(self, i):
@@ -288,11 +286,11 @@ class Controller:
                 return
             elif i is None:
                 pass
-            elif i not in self.temp_tags:
-                self.temp_tags.append(i)
-            self.disp_temp_tags()
+            elif i != self.temp_tag:
+                self.temp_tag = i
+            self.disp_temp_tag()
 
-    def disp_temp_tags(self):
+    def disp_temp_tag(self):
         try:
             self.tempframe3.destroy()
         except:
@@ -301,24 +299,13 @@ class Controller:
         self.tempframe3.grid()
 
         counter = 0
-        if len(self.tags) >= 1:
-            for i in self.temp_tags:
-                print(i)
-                counter+=1
-                self.tempbutton = Button(self.tempframe3, text=i, width=15, command = partial(self.del_obj_tag, i))
+        if self.temp_tag is not None:
+                self.tempbutton = Button(self.tempframe3, text=self.temp_tag, width=15, command = partial(self.del_obj_tag, self.temp_tag))
                 self.tempbutton.grid(row = 0, column = counter, sticky=N)
 
     def del_obj_tag(self, i):
-        # counter = 0
-        for item in self.temp_tags:
-            if item == i:
-                # print(i, item, counter)
-                self.temp_tags.remove(item)
-                self.disp_temp_tags()
-                return
-            else:
-                pass
-            # counter += 1
+        self.temp_tag = None
+        self.disp_temp_tag()
 
     def coord_validate(self, p1x, p1y, p2x, p2y):
         if abs(p1x - p2x)< 10 and abs(p1y - p2y)< 10:
@@ -375,7 +362,7 @@ class Controller:
         self.temp_start_y = None
         self.temp_end_x = None
         self.temp_end_y = None
-        self.temp_tags = []
+        self.temp_tag = None
         self.temp_obj = None
         try:
             self.tempframe3.destroy()

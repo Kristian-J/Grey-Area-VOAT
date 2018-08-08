@@ -8,7 +8,7 @@ class VidHandler():
     def __init__(self, origin):
         self.origin = origin
         self.file = origin.cnt_vid
-        self.cap = cv2.VideoCapture('vtest.avi')
+        self.cap = cv2.VideoCapture(self.file)
         self.total_frames = self.cap.get(7)
         print('the numer of frames are: ', self.total_frames)
         self.frame_num = 0
