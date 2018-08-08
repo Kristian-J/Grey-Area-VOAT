@@ -45,6 +45,8 @@ class Controller:
 
         self.vis_objects = []
 
+        self.current_file = None
+
         self.point_x = None
         self.point_y = None
 
@@ -129,16 +131,24 @@ class Controller:
 
     def img_call(self, fname):
         if len(self.vis_objects) >= 1:
-            SaveToFile(self.vis_objects, fname, None)
+            SaveToFile(self.vis_objects, self.current_file, None)
+        for i in self.vis_objects:
+            if i.active:
+                i.local_frame.destroy()
 
         self.reset_temp_obj()
         self.reset_new_obj()
         self.vis_objects = []
-        self.disp_img(fname)
+
+        tryload = LoadData(fname,None, self.obj_tags_frame)
+        if tryload.load:
+            self.vis_objects = tryload.image_objects
+        self.current_file = fname
         try:
             self.tempframe3.destroy()
         except:
             pass
+        self.disp_img(self.current_file)
 
     def disp_vid(self, fname):
         try:
