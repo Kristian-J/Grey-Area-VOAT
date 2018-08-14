@@ -48,7 +48,7 @@ class SessionFiles:
                                    )
         else:
             name = askopenfilename(initialdir="C:/Users/Batman/Documents/Programming/tkinter/",
-                                   filetypes=(("avi files", "*.avi"), ("MP4 files", "*.mp4"), ("All Files", "*.*")),
+                                   filetypes=(("video files", ("*.avi", "*.mp4")), ("All Files", "*.*")),
                                    title="Choose a file."
                                    )
 

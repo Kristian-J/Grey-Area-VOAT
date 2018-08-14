@@ -56,7 +56,7 @@ class Controller:
         # print(self.root1.winfo_pointerxy())
         ### setting the structure for the window and component elements ###
         self.tags_frame = Frame(self.root1)
-        self.tags_frame.grid(row=2, column=0, rowspan= 4, columnspan = 1, sticky=N)
+        self.tags_frame.grid(row=2, column=0, rowspan= 4, columnspan = 1, sticky=N, pady = 10)
         self.tf_active = False
 
         ### frame for displaying file name buttons
@@ -139,11 +139,12 @@ class Controller:
         self.reset_temp_obj()
         self.reset_new_obj()
         self.vis_objects = []
-
+        ### Import existing data if associated data file exists.
         tryload = LoadData(fname,None, self.obj_tags_frame)
         if tryload.load:
             self.vis_objects = tryload.image_objects
         self.current_file = fname
+
         try:
             self.tempframe3.destroy()
         except:
@@ -176,7 +177,7 @@ class Controller:
             # print(self.vis_objects, len(self.vis_objects))
             for i in self.vis_objects:
                 coords = i.obj_location
-                print(i, i.active, i.obj_location, i.obj_tag)
+                # print(i, i.active, i.obj_location, i.obj_tag)
                 try:
                     i.local_frame.destroy()
                     self.tempframe3.destroy()
@@ -187,7 +188,7 @@ class Controller:
                     i.disp_tag()
                 else:
                     cv2.rectangle(image, (coords[0], coords[1]), (coords[2], coords[3]),(200, 0, 0), 4)
-            print(self.vis_objects)
+            # print(self.vis_objects)
             # print("visobj coords: ", coords)
 
         # Rearrange the color channel
@@ -201,7 +202,7 @@ class Controller:
         self.scale_ratio = wpercent
         hsize = int((float(img.size[1]) * float(wpercent)))
         im = img.resize((basewidth, hsize), Image.ANTIALIAS)
-        print("image size debug", 'hight is- ', hsize, 'percent is- ', wpercent)
+        # print("image size debug", 'hight is- ', hsize, 'percent is- ', wpercent)
         imgtk = ImageTk.PhotoImage(master = self.local_frame, image=im)
 
         # Put it in the display window
@@ -319,14 +320,14 @@ class Controller:
 
     def coord_validate(self, p1x, p1y, p2x, p2y):
         if abs(p1x - p2x)< 10 and abs(p1y - p2y)< 10:
-            print(abs(p1x - p2x))
+            # print(abs(p1x - p2x))
             self.point_x = p1x
             self.point_y = p1y
             """need to add conditional check. if temp_tags is not empty, and a new (unsaved) ROI exists or active object has been modified, check if user wants to save the object """
             self.reset_temp_obj()
             self.reset_new_obj()
             point = [self.point_x, self.point_y]
-            print("coord val debug - vis-objs: ", self.vis_objects)
+            # print("coord val debug - vis-objs: ", self.vis_objects)
             if len(self.vis_objects) >=1:
                 flag = False
                 for o in self.vis_objects:

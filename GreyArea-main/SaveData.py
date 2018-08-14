@@ -11,9 +11,9 @@ class SaveToFile:
         self.objects = vis_objects
         self.frame_num = frame_num
         self.save_file = None
-        print("objects:  ",self.objects)
+        # print("objects:  ",self.objects)
         self.file = set_file_name(self.fname, self.frame_num)
-        print("filename is :", self.file)
+        # print("filename is :", self.file)
 
         self.text = self.make_text(self.objects)
         print("file text is : \n", self.text)
@@ -72,8 +72,8 @@ class LoadData:
                 self.temp_obj = VisualObject(self.temp_coords, self.temp_tag, self.host_frame)
                 self.image_objects.append(self.temp_obj)
 
-                print(self.image_objects)
-                print(self.temp_obj.host_frame, self.temp_obj.obj_location)
+                # print(self.image_objects)
+                # print(self.temp_obj.host_frame, self.temp_obj.obj_location)
 
 
 
