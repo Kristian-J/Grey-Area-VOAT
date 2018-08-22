@@ -4,6 +4,7 @@ from tkinter import *
 from tkinter import ttk
 from SaveData import *
 from functools import partial
+from Freature_handler import *
 
 
 class VidHandler():
@@ -18,11 +19,14 @@ class VidHandler():
         self.extract_frame(self.frame_num)
         self.local_frame = Frame(self.origin.controls_frame)
         self.local_frame.grid(sticky = N)
+
         global f_input
         labelmsg = "Max frame #:  " + str(self.total_frames - 1)
-        print(labelmsg)
+        # print(labelmsg)
+
         self.fnum_label = Label(self.local_frame, text=self.labelmessage)
         self.fnum_label.grid(row=0, column=0, padx = 5)
+
         back_jump = Button(self.local_frame, text = " <<-- ", command = partial(self.go_to_frame, -5) )
         back_jump.grid(row=0, column=1, padx = 5)
         back_step = Button(self.local_frame, text = " <- ", command = partial(self.go_to_frame, -1))
@@ -55,18 +59,20 @@ class VidHandler():
             if 0 <= frame_num < self.total_frames:
                 if len(self.origin.vis_objects) >= 1:
                     SaveToFile(self.origin.vis_objects, self.origin.cnt_vid, self.frame_num)
+                    obj_check = FeatureTrack("temp.jpg",self.file, frame_num, self.origin.vis_objects,self.origin.selected_tracker.get())
                 self.frame_num = frame_num
                 self.extract_frame(frame_num)
             else: print("number out of range")
 
     def go_to_frame(self, n):
         # print('incoming value = ', self.frame_num)
-        num = self.frame_num + n
+        frame_num = self.frame_num + n
         # print("self.frame_num = ", self.frame_num)
-        if 0 <= num < self.total_frames:
+        if 0 <= frame_num < self.total_frames:
             if len(self.origin.vis_objects) >= 1:
                 SaveToFile(self.origin.vis_objects, self.origin.cnt_vid, self.frame_num)
-            self.frame_num = num
+                obj_check = FeatureTrack("temp.jpg", self.file, frame_num, self.origin.vis_objects,self.origin.selected_tracker.get())
+            self.frame_num = frame_num
             self.extract_frame(self.frame_num)
         else:
             print("number out of range")
@@ -90,6 +96,7 @@ class VidHandler():
             if tryload.load:
                 self.origin.vis_objects = tryload.image_objects
             self.cap.set(1, num)
+            print(">>>>>> ", num, "<<<<<<")
             ret, frame = self.cap.read()
             cv2.imwrite('temp.jpg', frame)
             self.origin.disp_img('temp.jpg')

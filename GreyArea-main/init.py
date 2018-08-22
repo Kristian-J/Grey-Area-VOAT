@@ -11,6 +11,7 @@ from Vid_Handle import *
 from Img_handle import *
 from functools import partial
 
+
 class Controller:
     def __init__(self, ftype):
         self.ftype = ftype
@@ -97,6 +98,31 @@ class Controller:
         button4 = Button(self.menu_frame, width=15, text="Select File")
         button4.grid(row=2, column=1, sticky=N)
         button4.bind("<Button-1>", self.get_files)
+
+
+        option_frame=Frame(self.menu_frame)
+        option_frame.grid(row=3, column = 1)
+        tracker_list = ['Sift', 'Surf', 'Orb']
+        self.selected_tracker=StringVar()
+        tracker_name = "Sift"
+        self.selected_tracker.set(tracker_name)
+        # print('initial traker name is: ', self.selected_tracker.get())
+        tracker_menu = OptionMenu(option_frame, self.selected_tracker, 'Sift', 'Surf', 'Orb')
+        tracker_menu.config(width=10)
+        tracker_menu.grid(row = 1, column = 0)
+        thislabel = Label(option_frame, text = 'Tracker:')
+        thislabel.grid(row = 0, column = 0)
+        thislabel2 = Label(option_frame, textvariable = self.selected_tracker)
+        thislabel2.grid(row = 0, column = 1)
+        self.tracker_select = Button(option_frame, text = "set", command = self.set_tracker)
+        self.tracker_select.grid(row = 2, column = 0)
+
+
+        return
+
+    def set_tracker(self):
+        print(self.selected_tracker.get())
+        self.selected_tracker.set(self.selected_tracker.get())
         return
 
     def get_tags(self, event=NONE):
@@ -357,15 +383,22 @@ class Controller:
             ### invalid ROI
             return
         else:
+            ### normalise the coords
+            if p1x > p2x:
+                p1x, p2x = p2x, p1x
+            if p1y > p2y:
+                p1y, p2y = p2y, p1y
+            ### save the temp coords to new coords
             self.new_start_x = p1x
             self.new_start_y = p1y
             self.new_end_x = p2x
             self.new_end_y = p2y
+
             for i in self.vis_objects:
                 i.active = False
             self.active_flag = False
             self.disp_img(self.image_name)
-            print("new coordinates are", self.new_start_x, self.new_start_y, self.new_end_x, self.new_end_y)
+            # print("new coordinates are", self.new_start_x, self.new_start_y, self.new_end_x, self.new_end_y)
 
 
     def reset_temp_obj(self):
