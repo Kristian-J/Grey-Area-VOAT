@@ -70,6 +70,7 @@ if __name__ == '__main__':
     while True:
         # Read a new frame
         ok, frame = video.read()
+        print(ok, frame)
         if not ok:
             break
 

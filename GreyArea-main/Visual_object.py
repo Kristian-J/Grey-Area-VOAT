@@ -11,7 +11,7 @@ class VisualObject:
         self.p1_y = obj_xy[1]
         self.p2_x = obj_xy[2]
         self.p2_y = obj_xy[3]
-        self.obj_location = obj_xy
+        self.obj_location = (self.p1_x, self.p1_y, self.p2_x , self.p2_y)
         self.obj_tag = obj_tag
         self.host_frame = host_frame
         self.local_frame = None
