@@ -3,9 +3,7 @@ import os
 from Visual_object import *
 
 
-
 class SaveToFile:
-
     def __init__(self, vis_objects, fname, frame_num):
         self.fname = fname
         self.objects = vis_objects
@@ -35,6 +33,7 @@ class SaveToFile:
             index += 1
         return temp
 
+
 def set_file_name(fname, num):
     x = fname.split('.')
     y = ""
@@ -46,8 +45,10 @@ def set_file_name(fname, num):
     return y
     pass
 
+
 class LoadData:
-    """this class is for loading annotated visual object data. input is the current file name, frame number if applicable, and the tkinter frame that will host the object"""
+    """this class is for loading annotated visual object data"""
+    """input is the current file name, frame number if applicable, and the tkinter frame that will host the object"""
     def __init__(self, fname, num, host_frame):
         self.file = None
         self.fname = fname
@@ -67,13 +68,10 @@ class LoadData:
                 return
             for line in rawdata:
                 line = line.rstrip("\n").split(',')
-                self.temp_coords = [int(line[1]),int(line[2]),int(line[3]),int(line[4])]
+                self.temp_coords = [int(line[1]), int(line[2]), int(line[3]), int(line[4])]
                 self.temp_tag = line[5]
                 self.temp_obj = VisualObject(self.temp_coords, self.temp_tag, self.host_frame)
                 self.image_objects.append(self.temp_obj)
 
                 # print(self.image_objects)
                 # print(self.temp_obj.host_frame, self.temp_obj.obj_location)
-
-
-

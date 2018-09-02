@@ -102,12 +102,12 @@ class Controller:
 
         option_frame=Frame(self.menu_frame)
         option_frame.grid(row=3, column = 1)
-        tracker_list = ['Sift', 'Surf', 'Orb']
+        tracker_list = ["Boosting", "MIL","KFC", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT"]
         self.selected_tracker=StringVar()
-        tracker_name = "Sift"
+        tracker_name = "MIL"
         self.selected_tracker.set(tracker_name)
         # print('initial traker name is: ', self.selected_tracker.get())
-        tracker_menu = OptionMenu(option_frame, self.selected_tracker, 'Sift', 'Surf', 'Orb')
+        tracker_menu = OptionMenu(option_frame, self.selected_tracker, "Boosting", "MIL","KFC", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT")
         tracker_menu.config(width=10)
         tracker_menu.grid(row = 1, column = 0)
         thislabel = Label(option_frame, text = 'Tracker:')
@@ -117,21 +117,21 @@ class Controller:
         self.tracker_select = Button(option_frame, text = "set", command = self.set_tracker)
         self.tracker_select.grid(row = 2, column = 0)
 
-
         return
 
     def set_tracker(self):
-        print(self.selected_tracker.get())
+        print("a", self.selected_tracker.get())
         self.selected_tracker.set(self.selected_tracker.get())
+        print("b", self.selected_tracker)
         return
 
     def get_tags(self, event=NONE):
         self.session_tags = SessionTags(self)
-        print('these are the current tags', self.tags)
+        # print('these are the current tags', self.tags)
         return
     def get_files(self, event=NONE):
         self.session_files = SessionFiles(self)
-        print('these are the current files', self.files)
+        # print('these are the current files', self.files)
         return
 
     def disp_tags(self): ### displays general tag list as buttons
@@ -203,7 +203,7 @@ class Controller:
             # print(self.vis_objects, len(self.vis_objects))
             for i in self.vis_objects:
                 coords = i.obj_location
-                # print(i, i.active, i.obj_location, i.obj_tag)
+                print(i, i.active, i.obj_location, i.obj_tag)
                 try:
                     i.local_frame.destroy()
                     self.tempframe3.destroy()
@@ -371,10 +371,7 @@ class Controller:
                     self.active_flag = True
                 else:
                     self.active_flag = False
-
             self.disp_img(self.image_name)
-
-
         elif abs(p1x - p2x)< 10 and abs(p1y - p2y)> 10 or abs(p1x - p2x)> 10 and abs(p1y - p2y)< 10 :
             print("invalid ROI")
             self.reset_temp_obj()

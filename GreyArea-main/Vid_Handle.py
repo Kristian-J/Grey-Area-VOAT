@@ -59,7 +59,7 @@ class VidHandler():
             if 0 <= frame_num < self.total_frames:
                 if len(self.origin.vis_objects) >= 1:
                     SaveToFile(self.origin.vis_objects, self.origin.cnt_vid, self.frame_num)
-                    obj_check = FeatureTrack("temp.jpg",self.file, frame_num, self.origin.vis_objects,self.origin.selected_tracker.get())
+                    obj_check = FeatureTrack("temp.jpg",self.file, frame_num, self.origin.vis_objects,self.origin.selected_tracker.get(), )
                 self.frame_num = frame_num
                 self.extract_frame(frame_num)
             else: print("number out of range")
