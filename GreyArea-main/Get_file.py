@@ -27,14 +27,14 @@ class SessionFiles:
         return
 
     def select_files(self):
-        label = Label(self.local_frame, text="please select your file(s)").grid(row=0, column=0, columnspan=3)
+        label = ttk.Label(self.local_frame, text="please select your file(s)").grid(row=0, column=0, columnspan=3)
 
-        U_input_enter = Button(self.local_frame, text="File")
+        U_input_enter = ttk.Button(self.local_frame, text="File")
         U_input_enter.grid(row=1, column=0)
         U_input_enter.bind("<Button-1>", self.get_file_name)
             ### this will bind the button to mouse button 1 (left click) and call the get_file_name
 
-        U_input_exit = Button(self.local_frame, text="Done")
+        U_input_exit = ttk.Button(self.local_frame, text="Done")
         U_input_exit.grid(row=1,column=1)
         U_input_exit.bind("<Button-1>", self.quit_loop)
 

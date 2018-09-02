@@ -11,6 +11,8 @@ from Vid_Handle import *
 from Img_handle import *
 from functools import partial
 
+# style = ttk.Style()
+# style.configure("TButton", forground="blue", background="cyan")
 
 class Controller:
     def __init__(self, ftype):
@@ -26,6 +28,9 @@ class Controller:
         self.root1 = Tk() ### creating main window
         self.root1.title("Welcome")
         self.root1.geometry("1400x900")
+
+        style = ttk.Style()
+        style.configure("TButton", forground = "blue", background = "cyan")
 
         ### variables for handling ROI information
         self.temp_start_x = None ### temp coords of newly drawn/ currently being drawn ROI
@@ -92,10 +97,10 @@ class Controller:
         file.add_command(label='Exit', command=lambda: self.root1.quit())
         menu.add_cascade(label='File', menu=file)
 
-        button3 = Button(self.menu_frame, width=15, text="Add Tags")
+        button3 = ttk.Button(self.menu_frame, width=15, text="Add Tags")
         button3.grid(row=1, column=1, sticky=N)
         button3.bind("<Button-1>", self.get_tags)
-        button4 = Button(self.menu_frame, width=15, text="Select File")
+        button4 = ttk.Button(self.menu_frame, width=15, text="Select File")
         button4.grid(row=2, column=1, sticky=N)
         button4.bind("<Button-1>", self.get_files)
 
@@ -107,16 +112,18 @@ class Controller:
         tracker_name = "MIL"
         self.selected_tracker.set(tracker_name)
         # print('initial traker name is: ', self.selected_tracker.get())
-        tracker_menu = OptionMenu(option_frame, self.selected_tracker, "Boosting", "MIL","KFC", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT")
+        tracker_menu = ttk.OptionMenu(option_frame, self.selected_tracker, "Boosting", "MIL","KFC", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT")
         tracker_menu.config(width=10)
         tracker_menu.grid(row = 1, column = 0)
-        thislabel = Label(option_frame, text = 'Tracker:')
+        thislabel = ttk.Label(option_frame, text = 'Tracker:')
         thislabel.grid(row = 0, column = 0)
-        thislabel2 = Label(option_frame, textvariable = self.selected_tracker)
+        thislabel2 = ttk.Label(option_frame, textvariable = self.selected_tracker)
         thislabel2.grid(row = 0, column = 1)
-        self.tracker_select = Button(option_frame, text = "set", command = self.set_tracker)
+        self.tracker_select = ttk.Button(option_frame, text = "set", command = self.set_tracker)
         self.tracker_select.grid(row = 2, column = 0)
 
+        style = ttk.Style()
+        style.configure("TButton", forground="blue", background="cyan")
         return
 
     def set_tracker(self):
@@ -139,7 +146,7 @@ class Controller:
         self.tempframe1.grid()
         if len(self.tags) > 0:
             for i in self.tags:
-                self.tempbutton = Button(self.tempframe1, text=i ,width=15, command = partial(self.add_temp_tag, i))
+                self.tempbutton = ttk.Button(self.tempframe1, text=i ,width=15, command = partial(self.add_temp_tag, i))
                 self.tempbutton.grid(sticky=N)
 
     def disp_files(self):
@@ -148,11 +155,11 @@ class Controller:
         if len(self.files) > 0:
             if self.ftype == 'img':
                 for i in self.files:
-                    self.tempbutton = Button(self.tempframe2, text=i ,width=20, command = partial(self.img_call, i))
+                    self.tempbutton = ttk.Button(self.tempframe2, text=i ,width=20, command = partial(self.img_call, i))
                     self.tempbutton.grid(column=0)
             else:
                 for i in self.files:
-                    self.tempbutton = Button(self.tempframe2, text=i ,width=20, command = partial(self.disp_vid, i))
+                    self.tempbutton = ttk.Button(self.tempframe2, text=i ,width=20, command = partial(self.disp_vid, i))
                     self.tempbutton.grid(column=0)
 
     def img_call(self, fname):
@@ -424,15 +431,18 @@ class GetType():
         self.response = None
 
         self.root0 = Tk()
+        style = ttk.Style()
+        style.configure("TButton", forground="red", background="blue")
+        self.root0.geometry("300x100")
         self.frame = Frame(self.root0)
         self.frame.grid(row = 0, column = 0)
-        Label(self.frame, text="Are you working with image or video files today?").grid(row=0, column=0, columnspan=2)
+        ttk.Label(self.frame, text="Are you working with image or video files today?").grid(row=0, column=0, columnspan=2)
 
-        button1 = Button(self.frame, width=20, height=5, text="Image")
+        button1 = ttk.Button(self.frame, text="Image")
         button1.grid(row=1, column=0, sticky=N)
         button1.bind("<Button-1>", self.ftypeim)
 
-        button2 = Button(self.frame, width=20, height=5, text="Video")
+        button2 = ttk.Button(self.frame, text="Video")
         button2.grid(row=1, column=1, sticky=N)
         button2.bind("<Button-1>", self.ftypevid)
 
@@ -459,11 +469,11 @@ class user_confirm():
         self.local_root1 = Tk()
         self.local_root1.title("Welcome")
         self.local_root1.geometry("300x300")
-        label = Label(self.local_root1, text=self.question).grid(row=0, column=0, columnspan=2)
-        self.positive = Button(self.local_root1, width=20, height=5, text="Continue", command = partial(self.assign_response, True))
+        label = ttk.Label(self.local_root1, text=self.question).grid(row=0, column=0, columnspan=2)
+        self.positive = ttk.Button(self.local_root1, width=20, height=5, text="Continue", command = partial(self.assign_response, True))
         self.positive.grid(row=1, column=0, sticky=N)
 
-        self.negative = Button(self.local_root1, width=20, height=5, text="Cancel", command = partial(self.assign_response, False))
+        self.negative = ttk.Button(self.local_root1, width=20, height=5, text="Cancel", command = partial(self.assign_response, False))
         self.negative.grid(row=1, column=1, sticky=N)
         self.local_root1.mainloop()
     def assign_response(self, response, event=NONE):

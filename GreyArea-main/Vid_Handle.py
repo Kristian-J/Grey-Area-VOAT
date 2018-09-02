@@ -24,25 +24,25 @@ class VidHandler():
         labelmsg = "Max frame #:  " + str(self.total_frames - 1)
         # print(labelmsg)
 
-        self.fnum_label = Label(self.local_frame, text=self.labelmessage)
+        self.fnum_label = ttk.Label(self.local_frame, text=self.labelmessage)
         self.fnum_label.grid(row=0, column=0, padx = 5)
 
-        back_jump = Button(self.local_frame, text = " <<-- ", command = partial(self.go_to_frame, -5) )
+        back_jump = ttk.Button(self.local_frame, text = " <<-- ", command = partial(self.go_to_frame, -5) )
         back_jump.grid(row=0, column=1, padx = 5)
-        back_step = Button(self.local_frame, text = " <- ", command = partial(self.go_to_frame, -1))
+        back_step = ttk.Button(self.local_frame, text = " <- ", command = partial(self.go_to_frame, -1))
         back_step.grid(row=0, column=2, padx = 5)
-        step = Button(self.local_frame, text = " -> ", command = partial(self.go_to_frame, 1))
+        step = ttk.Button(self.local_frame, text = " -> ", command = partial(self.go_to_frame, 1))
         step.grid(row=0, column=3, padx = 5)
-        jump = Button(self.local_frame, text = " -->> ", command = partial(self.go_to_frame, 5))
+        jump = ttk.Button(self.local_frame, text = " -->> ", command = partial(self.go_to_frame, 5))
         jump.grid(row=0, column=4, padx = 5)
 
-        label = Label(self.local_frame, text=labelmsg)
+        label = ttk.Label(self.local_frame, text=labelmsg)
         label.grid(row=0, column=5)
-        f_input = Entry(self.local_frame, width=20 )
+        f_input = ttk.Entry(self.local_frame, width=20 )
         f_input.grid(row=0, column=6)
         f_input.bind("<Return>", self.set_f_num)
 
-        f_input_enter = Button(self.local_frame, text="Enter")
+        f_input_enter = ttk.Button(self.local_frame, text="Enter")
         f_input_enter.grid(row=0, column=7)
         f_input_enter.bind("<Button-1>", self.set_f_num)
 
