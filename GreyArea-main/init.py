@@ -108,17 +108,19 @@ class Controller:
 
         option_frame=Frame(self.menu_frame)
         option_frame.grid(row=3, column = 1)
-        tracker_list = ["Boosting", "MIL","KFC", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT"]
+        tracker_list = ["Boosting", "MIL","KCF", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT", "None"]
         self.selected_tracker=StringVar()
+        # self.active_tracker=StringVar()
         tracker_name = "MIL"
+        # self.active_tracker.set(tracker_name)
         self.selected_tracker.set(tracker_name)
         # print('initial traker name is: ', self.selected_tracker.get())
-        tracker_menu = ttk.OptionMenu(option_frame, self.selected_tracker, "Boosting", "MIL","KFC", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT")
+        tracker_menu = ttk.OptionMenu(option_frame, self.selected_tracker, "Boosting", "MIL","KCF", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT", "None")
         tracker_menu.config(width=10)
         tracker_menu.grid(row = 1, column = 0)
         thislabel = ttk.Label(option_frame, text = 'Tracker:')
         thislabel.grid(row = 0, column = 0)
-        thislabel2 = ttk.Label(option_frame, textvariable = self.selected_tracker)
+        thislabel2 = ttk.Label(option_frame, textvariable = self.set_tracker)
         thislabel2.grid(row = 0, column = 1)
         self.tracker_select = ttk.Button(option_frame, text = "set", command = self.set_tracker)
         self.tracker_select.grid(row = 2, column = 0)
@@ -178,6 +180,7 @@ class Controller:
         if tryload.load:
             self.vis_objects = tryload.image_objects
         self.current_file = fname
+
 
         try:
             self.tempframe3.destroy()
@@ -471,10 +474,10 @@ class user_confirm():
         self.local_root1.title("Welcome")
         self.local_root1.geometry("300x300")
         label = ttk.Label(self.local_root1, text=self.question).grid(row=0, column=0, columnspan=2)
-        self.positive = ttk.Button(self.local_root1, width=20, height=5, text="Continue", command = partial(self.assign_response, True))
+        self.positive = ttk.Button(self.local_root1, text="Continue", command = partial(self.assign_response, True))
         self.positive.grid(row=1, column=0, sticky=N)
 
-        self.negative = ttk.Button(self.local_root1, width=20, height=5, text="Cancel", command = partial(self.assign_response, False))
+        self.negative = ttk.Button(self.local_root1, text="Cancel", command = partial(self.assign_response, False))
         self.negative.grid(row=1, column=1, sticky=N)
         self.local_root1.mainloop()
     def assign_response(self, response, event=NONE):

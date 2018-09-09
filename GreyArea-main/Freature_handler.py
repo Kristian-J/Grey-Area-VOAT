@@ -13,7 +13,9 @@ class FeatureTrack:
         self.temp_objects = []
         # return
         # print("this is the feature handler data:", self.ojects,self.t_name,self.file,self.frame_num)
-
+        if self.t_name == 'None':
+            print("no active tracker")
+            return
         img1 = cv2.imread('temp.jpg')  ##, cv2.IMREAD_GRAYSCALE)
         # print("&>>>>", self.frame_num, "<<<<&")
         self.cap.set(1, self.frame_num)
@@ -32,7 +34,7 @@ class FeatureTrack:
         #     # tracker = cv2.ORB_create(nfeatures=3000)
         print("c", t_name)
             # Create a tracker based on tracker name
-        self.tracker_list = ["Boosting", "MIL", "KFC", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT"]
+        self.tracker_list = ["Boosting", "MIL", "KCF", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT", "None"]
         #
         # if t_name == "Boosting":
         #     tracker = cv2.TrackerBoosting_create()
@@ -112,6 +114,9 @@ class FeatureTrack:
             tracker = cv2.TrackerMOSSE_create()
         elif tracker_name == self.tracker_list[7]:
             tracker = cv2.TrackerCSRT_create()
+        elif tracker_name == self.tracker_list[8]:
+            print("no active tracker")
+            tracker = None
         else:
             tracker = None
             print("traker designation not valid")
