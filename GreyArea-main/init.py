@@ -100,9 +100,10 @@ class Controller:
         button3 = ttk.Button(self.menu_frame, width=15, text="Add Tags")
         button3.grid(row=1, column=1, sticky=N)
         button3.bind("<Button-1>", self.get_tags)
-        button4 = ttk.Button(self.menu_frame, width=15, text="Select File")
+        button4 = Button(self.menu_frame, width=15, text="Select File")
         button4.grid(row=2, column=1, sticky=N)
         button4.bind("<Button-1>", self.get_files)
+        button4.config(bg = 'red', fg = "blue")
 
 
         option_frame=Frame(self.menu_frame)
