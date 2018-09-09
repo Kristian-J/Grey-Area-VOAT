@@ -21,17 +21,6 @@ class FeatureTrack:
         self.cap.set(1, self.frame_num)
         ret, frame = self.cap.read()
         img2 = frame
-        # img2 = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        # # img2 = cv2.imread('temp2.jpg', cv2.IMREAD_GRAYSCALE)
-        # if t_name == 'Sift':
-        #     # tracker = cv2.TrackerMIL_create()
-        #     # tracker = cv2.xfeatures2d.SIFT_create()
-        #     tracker = cv2.SIFT_create()
-        # if t_name == 'Surf':
-        #     tracker = cv2.xfeatures2d.SURF_create()
-        # if t_name == 'Orb':
-        #     tracker = cv2.ORB_create()
-        #     # tracker = cv2.ORB_create(nfeatures=3000)
         print("c", t_name)
             # Create a tracker based on tracker name
         self.tracker_list = ["Boosting", "MIL", "KCF", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT", "None"]
@@ -122,6 +111,55 @@ class FeatureTrack:
             print("traker designation not valid")
 
         return tracker
+
+class FeatureExtract():
+    def __init__(self, fname, objects):
+        if len(objects) < 1:
+            return
+        img = cv2.imread(fname, cv2.IMREAD_GRAYSCALE)
+        for obj in objects:
+            coords = obj.obj_location
+            print("the coords: ", coords[0],abs(coords[0] - coords[2]), coords[1],abs(coords[1] - coords[3]))
+            roi = img[coords[0]:coords[0] + abs(coords[0] - coords[2]), coords[1]:coords[1] + abs(coords[1] - coords[3])]
+            # roi = img[coords[0]:coords[1], coords[2]:coords[3]]
+            sift = cv2.xfeatures2d.SIFT_create()
+            keypoints, destcriptors = sift.detectAndCompute(img, None)
+            im = cv2.drawKeypoints(img, keypoints, None)
+            cv2.imshow("image1", im)
+
+            surf = cv2.xfeatures2d.SURF_create()
+            keypoints, destcriptors = surf.detectAndCompute(img, None)
+            im = cv2.drawKeypoints(img, keypoints, None)
+            cv2.imshow("image2", im)
+
+            orb = cv2.ORB_create(nfeatures=3000)
+            keypoints, destcriptors = orb.detectAndCompute(img, None)
+            im = cv2.drawKeypoints(img, keypoints, None)
+            cv2.imshow("image3", im)
+
+            # imsize = img.shape
+            # print("image dimensions are: ", imsize[0],imsize[1],imsize[2])
+
+            # filename= fname + 'orb.jpg'
+            # cv2.imwrite(filename, img)
+
+            cv2.imshow("image", img)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+
+        # img2 = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # # img2 = cv2.imread('temp2.jpg', cv2.IMREAD_GRAYSCALE)
+        # if t_name == 'Sift':
+        #     # tracker = cv2.TrackerMIL_create()
+        #     # tracker = cv2.xfeatures2d.SIFT_create()
+        #     tracker = cv2.SIFT_create()
+        # if t_name == 'Surf':
+        #     tracker = cv2.xfeatures2d.SURF_create()
+        # if t_name == 'Orb':
+        #     tracker = cv2.ORB_create()
+        #     # tracker = cv2.ORB_create(nfeatures=3000)
+
+
 
 # # kp = sift.detect(img, None)
 # keypoints, destcriptors = tracker.detectAndCompute(img1, None)

@@ -18,12 +18,10 @@ class SessionTags:
         self.style.configure("TButton", forground="blue", background="cyan")
         if len(self.origin.tags) >=1:
             self.dis_tags()
-        if self.origin.tf_active:
-            return
-        elif self.origin.df_active:
+        if self.origin.df_active:
             return
         else:
-            self.origin.tf_active = True
+            self.origin.df_active = True
             print('tf set true')
             self.select_tags()
         return
@@ -65,7 +63,7 @@ class SessionTags:
 
     def quit_loop(self, event=NONE):
         # self.local.quit()
-        self.origin.tf_active = False
+        self.origin.df_active = False
         print('tf set false')
         self.origin.tags = self.tag_list
         try:

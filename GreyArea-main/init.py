@@ -6,7 +6,7 @@ from tkinter import ttk
 from Tag_Builder import *
 from Visual_object import *
 from SaveData import *
-from module_template import *
+# from module_template import *
 from Vid_Handle import *
 from Img_handle import *
 from functools import partial
@@ -101,9 +101,9 @@ class Controller:
         button3.grid(row=1, column=1, sticky=N)
         button3.bind("<Button-1>", self.get_tags)
         button4 = Button(self.menu_frame, width=15, text="Select File")
-        button4.grid(row=2, column=1, sticky=N)
+        button4.grid(row=2, column=1, sticky=N, padx = 5)
         button4.bind("<Button-1>", self.get_files)
-        button4.config(bg = 'red', fg = "blue")
+        button4.config(bg = "#FAD7A0", fg = "blue" , relief = RIDGE, highlightcolor= "red", bd = 5)
 
 
         option_frame=Frame(self.menu_frame)
@@ -176,7 +176,7 @@ class Controller:
         self.reset_new_obj()
         self.vis_objects = []
         ### Import existing data if associated data file exists.
-        tryload = LoadData(fname,None, self.obj_tags_frame)
+        tryload = LoadData(fname, None, self.obj_tags_frame)
         if tryload.load:
             self.vis_objects = tryload.image_objects
         self.current_file = fname
@@ -203,10 +203,26 @@ class Controller:
         except:
             print("could not destroy local_frame")
             pass
+
+        ### automatically add new object tags to session tags
+        for i in self.vis_objects:
+            if i.obj_tag not in self.tags:
+                self.tags.append(i.obj_tag)
+                try:
+                    self.tempframe1.destroy()
+                except:
+                    pass
+                self.disp_tags()
+
+
+
         self.local_frame = Frame(self.disp_frame)
         self.local_frame.grid()
+
         self.image_name = fname
 
+        self.local_button = ttk.Button(self.local_frame, text = "extract features", command = partial(FeatureExtract, self.image_name, self.vis_objects))
+        self.local_button.grid()
         image = cv2.imread(self.image_name) ### imports the image
         if self.new_start_x is not None and self.new_end_x is not None:
             cv2.rectangle(image, (self.new_start_x, self.new_start_y), (self.new_end_x, self.new_end_y),(0, 0, 255), 4)
@@ -280,6 +296,8 @@ class Controller:
         # print("tempobj = ",self.temp_obj)
     def bind_backSpace(self,event):
         print('backspace was pressed')
+        if self.df_active:
+            return
         for i in self.vis_objects:
             if i.active:
                 confirm = user_confirm("do you want to remove this object?").response

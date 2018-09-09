@@ -15,9 +15,7 @@ class SessionFiles:
         self.local_frame = Frame(origin.disp_frame) ### creates a frame hosted the display frame of the main window
         self.local_frame.grid(row = 0, column=0) ### "packs" or "displays" frame
 
-        if self.origin.tf_active:
-            return
-        elif self.origin.df_active:
+        if self.origin.df_active:
             return
         else:
             self.origin.df_active = True
