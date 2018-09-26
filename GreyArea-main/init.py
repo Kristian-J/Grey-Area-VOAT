@@ -248,7 +248,7 @@ class Controller:
         except:
             pass
         self.cnt_vid = fname
-        self.video_disp = VidHandler(self.cnt_vid, self.controls_frame, self.vis_objects, self.t_type, self.obj_tags_frame, self.reset_temp_obj,self.reset_new_obj, self.disp_img) # VidHandler(self)
+        self.video_disp = VidHandler(self)
 
         return
 
@@ -258,8 +258,11 @@ class Controller:
         except:
             print("could not destroy local_frame")
             pass
+        print("just checking:", self.vis_objects, visobjects)
         if len(visobjects) >=1:
             self.vis_objects = visobjects
+        else:
+            self.vis_objects = []
         ### automatically add new object tags to session tags
         # print("and here the objects are :", self.video_disp.vis_objects)
         for i in self.vis_objects:
