@@ -54,9 +54,9 @@ class FeatureTrack:
         ok, BB = multiTracker.update(img2)
         if ok:
             for i, new_box in enumerate(BB):
-                print('the multitracker result is :', i, new_box[0],new_box[1],new_box[2],new_box[3])
+                # print('the multitracker result is :', i, new_box[0],new_box[1],new_box[2],new_box[3])
                 ROI = int(new_box[0]), int(new_box[1]),int(new_box[0] + new_box[2]),int(new_box[1] + new_box[3])
-                print("new coords are: ", ROI, "original location: ",self.objects[i].obj_location)
+                # print("new coords are: ", ROI, "original location: ",self.objects[i].obj_location)
                 # self.temp_objects.append(self.objects[i])
                 # self.temp_objects[i].obj_location = ROI
                 self.objects[i].obj_location = ROI
@@ -125,17 +125,17 @@ class FeatureExtract():
             sift = cv2.xfeatures2d.SIFT_create()
             keypoints, destcriptors = sift.detectAndCompute(img, None)
             im = cv2.drawKeypoints(img, keypoints, None)
-            cv2.imshow("image1", im)
+            cv2.imshow("Sift points", im)
 
             surf = cv2.xfeatures2d.SURF_create()
             keypoints, destcriptors = surf.detectAndCompute(img, None)
             im = cv2.drawKeypoints(img, keypoints, None)
-            cv2.imshow("image2", im)
+            cv2.imshow("Surf points", im)
 
             orb = cv2.ORB_create(nfeatures=3000)
             keypoints, destcriptors = orb.detectAndCompute(img, None)
             im = cv2.drawKeypoints(img, keypoints, None)
-            cv2.imshow("image3", im)
+            cv2.imshow("ORB points", im)
 
             # imsize = img.shape
             # print("image dimensions are: ", imsize[0],imsize[1],imsize[2])

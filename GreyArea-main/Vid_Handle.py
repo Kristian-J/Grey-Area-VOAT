@@ -8,16 +8,22 @@ from Freature_handler import *
 
 
 class VidHandler():
-    def __init__(self, origin):
-        self.origin = origin
-        self.file = origin.cnt_vid
+    def __init__(self, crnt_vid, controls_frame, vis_objects, selected_tracker, obj_tags_frame, reset_temp_obj, reset_new_obj, disp_img): # (self, origin): #
+        # self.origin = origin
+        self.file = crnt_vid # origin.cnt_vid
+        self.vis_objects = vis_objects
+        self.selected_tracker = selected_tracker
+        self.obj_tags_frame = obj_tags_frame
+        self.reset_temp_obj = reset_temp_obj
+        self.reset_new_obj = reset_new_obj
+        self.disp_img = disp_img
         self.cap = cv2.VideoCapture(self.file)
         self.total_frames = self.cap.get(7)
         print('the numer of frames are: ', self.total_frames)
         self.frame_num = 0
         self.labelmessage = "The current frame is #" + str(self.frame_num)
         self.extract_frame(self.frame_num)
-        self.local_frame = Frame(self.origin.controls_frame)
+        self.local_frame = Frame(controls_frame) # (self.origin.controls_frame)
         self.local_frame.grid(sticky = N)
 
         global f_input
@@ -26,6 +32,8 @@ class VidHandler():
 
         self.fnum_label = ttk.Label(self.local_frame, text=self.labelmessage)
         self.fnum_label.grid(row=0, column=0, padx = 5)
+        style = ttk.Style()
+        style.configure("TButton", forground="blue", background="cyan")
 
         back_jump = ttk.Button(self.local_frame, text = " <<-- ", command = partial(self.go_to_frame, -5) )
         back_jump.grid(row=0, column=1, padx = 5)
@@ -57,8 +65,8 @@ class VidHandler():
             pass
         if type(frame_num) == int:
             if 0 <= frame_num < self.total_frames:
-                if len(self.origin.vis_objects) >= 1:
-                    SaveToFile(self.origin.vis_objects, self.origin.cnt_vid, self.frame_num)
+                if len(self.vis_objects) >= 1:
+                    SaveToFile(self.vis_objects, self.file, self.frame_num)
                     # obj_check = FeatureTrack("temp.jpg",self.file, frame_num, self.origin.vis_objects,self.origin.selected_tracker.get(), )
                 self.frame_num = frame_num
                 self.extract_frame(frame_num)
@@ -69,9 +77,9 @@ class VidHandler():
         frame_num = self.frame_num + n
         # print("self.frame_num = ", self.frame_num)
         if 0 <= frame_num < self.total_frames:
-            if len(self.origin.vis_objects) >= 1:
-                SaveToFile(self.origin.vis_objects, self.origin.cnt_vid, self.frame_num)
-                obj_check = FeatureTrack("temp.jpg", self.file, frame_num, self.origin.vis_objects,self.origin.selected_tracker.get())
+            if len(self.vis_objects) >= 1:
+                SaveToFile(self.vis_objects, self.file, self.frame_num)
+                obj_check = FeatureTrack("temp.jpg", self.file, frame_num, self.vis_objects,self.selected_tracker)
             self.frame_num = frame_num
             self.extract_frame(self.frame_num)
         else:
@@ -79,7 +87,7 @@ class VidHandler():
             return
 
     def extract_frame(self, num):
-            for i in self.origin.vis_objects:
+            for i in self.vis_objects:
                 if i.active:
                     i.local_frame.destroy()
             try:
@@ -87,19 +95,20 @@ class VidHandler():
                 self.fnum_label.config(text=temptext)
             except:
                 pass
-            self.origin.reset_temp_obj()
-            self.origin.reset_new_obj()
-            self.origin.vis_objects = []
+            self.reset_temp_obj()
+            self.reset_new_obj()
+            self.vis_objects = []
 
             ### Import existing data if associated data file exists.
-            tryload = LoadData(self.origin.cnt_vid, self.frame_num, self.origin.obj_tags_frame)
+            tryload = LoadData(self.file, self.frame_num, self.obj_tags_frame)
             if tryload.load:
-                self.origin.vis_objects = tryload.image_objects
+                self.vis_objects = tryload.image_objects
+                print("the objects are: ", self.vis_objects)
             self.cap.set(1, num)
             print(">>>>>> ", num, "<<<<<<")
             ret, frame = self.cap.read()
             cv2.imwrite('temp.jpg', frame)
-            self.origin.disp_img('temp.jpg')
+            self.disp_img('temp.jpg', self.vis_objects)
 
 
 

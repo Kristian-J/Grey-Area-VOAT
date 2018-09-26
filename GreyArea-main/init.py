@@ -8,7 +8,8 @@ from Visual_object import *
 from SaveData import *
 # from module_template import *
 from Vid_Handle import *
-from Img_handle import *
+from PIL import Image, ImageTk
+# from Img_handle import *
 from functools import partial
 
 # style = ttk.Style()
@@ -24,6 +25,7 @@ class Controller:
         self.tags =[]  ### list of current tags
         self.session_files = None ### for storing the instance of SessionFiles
         self.image_name = None
+        self.video_disp = None
         ### creating the main window ###
         self.root1 = Tk() ### creating main window
         self.root1.title("Welcome")
@@ -100,70 +102,118 @@ class Controller:
         button3 = ttk.Button(self.menu_frame, width=15, text="Add Tags")
         button3.grid(row=1, column=1, sticky=N)
         button3.bind("<Button-1>", self.get_tags)
-        button4 = Button(self.menu_frame, width=15, text="Select File")
-        button4.grid(row=2, column=1, sticky=N, padx = 5)
+        button4 = ttk.Button(self.menu_frame, width=15, text="Select File")
+        button4.grid(row=2, column=1,sticky = N, padx = 6) # button4.grid(row=2, column=1, sticky=N, padx = 5)
         button4.bind("<Button-1>", self.get_files)
-        button4.config(bg = "#FAD7A0", fg = "blue" , relief = RIDGE, highlightcolor= "red", bd = 5)
+        # button4.config(bg = "#FAD7A0", fg = "blue" , relief = RIDGE, highlightcolor= "red", bd = 5)
 
 
-        option_frame=Frame(self.menu_frame)
-        option_frame.grid(row=3, column = 1)
-        tracker_list = ["Boosting", "MIL","KCF", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT", "None"]
-        self.selected_tracker=StringVar()
-        # self.active_tracker=StringVar()
-        tracker_name = "MIL"
-        # self.active_tracker.set(tracker_name)
-        self.selected_tracker.set(tracker_name)
-        # print('initial traker name is: ', self.selected_tracker.get())
-        tracker_menu = ttk.OptionMenu(option_frame, self.selected_tracker, "Boosting", "MIL","KCF", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT", "None")
-        tracker_menu.config(width=10)
-        tracker_menu.grid(row = 1, column = 0)
-        thislabel = ttk.Label(option_frame, text = 'Tracker:')
-        thislabel.grid(row = 0, column = 0)
-        thislabel2 = ttk.Label(option_frame, textvariable = self.set_tracker)
-        thislabel2.grid(row = 0, column = 1)
-        self.tracker_select = ttk.Button(option_frame, text = "set", command = self.set_tracker)
-        self.tracker_select.grid(row = 2, column = 0)
+        self.tracker_list = ["Boosting", "MIL","KCF", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT", "None"]
+
+        self.tracker_frame = Frame(self.menu_frame)
+        self.tracker_frame.grid(row=3, column=1)
+        # self.t_type = StringVar()
+        # self.t_type.set("None")
+        self.t_type = "None"
+        self.t_type_label = ttk.Label(self.tracker_frame, text = "Selected Tracker:")
+        self.t_type_label.grid()
+        self.t_type_select = ttk.Button(self.tracker_frame, text = self.t_type, command = self.select_tracker)
+        self.t_type_select.grid()
+
+
+        # option_frame=Frame(self.menu_frame)
+        # option_frame.grid(row=3, column = 1)
+        # self.selected_tracker=StringVar()
+        # # self.active_tracker=StringVar()
+        # tracker_name = "MIL"
+        # # self.active_tracker.set(tracker_name)
+        # self.selected_tracker.set(tracker_name)
+        # # print('initial traker name is: ', self.selected_tracker.get())
+        # tracker_menu = ttk.OptionMenu(option_frame, self.selected_tracker, "Boosting", "MIL","KCF", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT", "None")
+        # tracker_menu.config(width=10)
+        # tracker_menu.grid(row = 1, column = 0)
+        # thislabel = ttk.Label(option_frame, text = 'Tracker:')
+        # thislabel.grid(row = 0, column = 0)
+        # thislabel2 = ttk.Label(option_frame, textvariable = self.set_tracker)
+        # thislabel2.grid(row = 0, column = 1)
+        # self.tracker_select = ttk.Button(option_frame, text = "set", command = self.set_tracker)
+        # self.tracker_select.grid(row = 2, column = 0)
 
         style = ttk.Style()
         style.configure("TButton", forground="blue", background="cyan")
         return
 
-    def set_tracker(self):
-        print("a", self.selected_tracker.get())
-        self.selected_tracker.set(self.selected_tracker.get())
-        print("b", self.selected_tracker)
+    def select_tracker(self):
+        if self.df_active:
+            return
+        else:
+            self.active_window(True)
+        this_frame = Frame(self.disp_frame)
+        this_frame.grid(row=0, column = 0)
+        for t in self.tracker_list:
+            print("tracker name : ", t)
+            temp_button = ttk.Button(this_frame, text = t, command = partial(self.set_tracker, t, this_frame) )
+            temp_button.grid()
+        # print("a", self.selected_tracker.get())
+        # self.selected_tracker.set(self.selected_tracker.get())
+        # print("b", self.selected_tracker)
+
+        return
+
+    def set_tracker(self, tname, frame):
+        print("almost there buddy, keep up the good work", tname)
+        self.t_type = tname
+        self.t_type_select.config(text = tname)
+        frame.destroy()
+        self.active_window(False)
         return
 
     def get_tags(self, event=NONE):
-        self.session_tags = SessionTags(self)
+        if self.df_active:
+            return
+        else:
+            self.session_tags = SessionTags(self.tags, self.disp_frame, self.active_window, self.disp_tags) #= SessionTags(self)
+            self.tags = self.session_tags.tag_list
         # print('these are the current tags', self.tags)
         return
     def get_files(self, event=NONE):
-        self.session_files = SessionFiles(self)
+        if self.df_active:
+            return
+        else:
+            pass
+        if self.session_files is None:
+            self.session_files = SessionFiles(self.files, self.root1, self.disp_frame, self.files_frame, self.ftype, self.active_window, self.img_call, self.disp_vid)
+        else:
+            self.session_files.select_files()
         # print('these are the current files', self.files)
         return
 
     def disp_tags(self): ### displays general tag list as buttons
+        try:
+            self.tempframe1.destroy()
+        except:
+            pass
         self.tempframe1 = Frame(self.tags_frame)
         self.tempframe1.grid()
+        tagslabel = ttk.Label(self.tempframe1, text = "Reference Tags")
+        tagslabel.grid(sticky=N)
         if len(self.tags) > 0:
             for i in self.tags:
                 self.tempbutton = ttk.Button(self.tempframe1, text=i ,width=15, command = partial(self.add_temp_tag, i))
                 self.tempbutton.grid(sticky=N)
-
-    def disp_files(self):
-        self.tempframe2 = Frame(self.files_frame)
-        self.tempframe2.grid(sticky=N)
-        if len(self.files) > 0:
-            if self.ftype == 'img':
-                for i in self.files:
-                    self.tempbutton = ttk.Button(self.tempframe2, text=i ,width=20, command = partial(self.img_call, i))
-                    self.tempbutton.grid(column=0)
-            else:
-                for i in self.files:
-                    self.tempbutton = ttk.Button(self.tempframe2, text=i ,width=20, command = partial(self.disp_vid, i))
-                    self.tempbutton.grid(column=0)
+    #
+    # def disp_files(self):
+    #     self.tempframe2 = Frame(self.files_frame)
+    #     self.tempframe2.grid(sticky=N)
+    #     if len(self.files) > 0:
+    #         if self.ftype == 'img':
+    #             for i in self.files:
+    #                 self.tempbutton = ttk.Button(self.tempframe2, text=i ,width=20, command = partial(self.img_call, i))
+    #                 self.tempbutton.grid(column=0)
+    #         else:
+    #             for i in self.files:
+    #                 self.tempbutton = ttk.Button(self.tempframe2, text=i ,width=20, command = partial(self.disp_vid, i))
+    #                 self.tempbutton.grid(column=0)
 
     def img_call(self, fname):
         if len(self.vis_objects) >= 1:
@@ -181,30 +231,37 @@ class Controller:
             self.vis_objects = tryload.image_objects
         self.current_file = fname
 
-
         try:
             self.tempframe3.destroy()
         except:
             pass
-        self.disp_img(self.current_file)
+        self.disp_img(self.current_file, self.vis_objects)
 
     def disp_vid(self, fname):
+        try:
+            self.reset_temp_obj()
+            self.reset_new_obj()
+        except:
+            pass
         try:
             self.video_disp.local_frame.destroy()
         except:
             pass
         self.cnt_vid = fname
-        self.video_disp = VidHandler(self)
+        self.video_disp = VidHandler(self.cnt_vid, self.controls_frame, self.vis_objects, self.t_type, self.obj_tags_frame, self.reset_temp_obj,self.reset_new_obj, self.disp_img) # VidHandler(self)
+
         return
 
-    def disp_img(self, fname):
+    def disp_img(self, fname, visobjects):
         try:
             self.local_frame.destroy()
         except:
             print("could not destroy local_frame")
             pass
-
+        if len(visobjects) >=1:
+            self.vis_objects = visobjects
         ### automatically add new object tags to session tags
+        # print("and here the objects are :", self.video_disp.vis_objects)
         for i in self.vis_objects:
             if i.obj_tag not in self.tags:
                 self.tags.append(i.obj_tag)
@@ -215,7 +272,7 @@ class Controller:
                 self.disp_tags()
 
 
-
+        # establishes the host frame for display
         self.local_frame = Frame(self.disp_frame)
         self.local_frame.grid()
 
@@ -307,7 +364,7 @@ class Controller:
                         i.local_frame.destroy()
                     except:
                         pass
-                    self.disp_img(self.image_name)
+                    self.disp_img(self.image_name, self.vis_objects)
                     self.active_flag = False
                     print("object should have been removed")
                     return
@@ -335,7 +392,7 @@ class Controller:
                 self.active_flag = True
                 self.vis_objects.append(self.new_obj)
                 self.reset_temp_obj()
-                self.disp_img(self.image_name)
+                self.disp_img(self.image_name,self.vis_objects)
 
             # print('temp_obj', self.temp_obj)
             # print("vis_objects", self.vis_objects)
@@ -374,6 +431,8 @@ class Controller:
         self.disp_temp_tag()
 
     def coord_validate(self, p1x, p1y, p2x, p2y):
+        if p1x == None or p1y == None:
+            return
         if abs(p1x - p2x)< 10 and abs(p1y - p2y)< 10:
             # print(abs(p1x - p2x))
             self.point_x = p1x
@@ -400,7 +459,7 @@ class Controller:
                     self.active_flag = True
                 else:
                     self.active_flag = False
-            self.disp_img(self.image_name)
+            self.disp_img(self.image_name, self.vis_objects)
         elif abs(p1x - p2x)< 10 and abs(p1y - p2y)> 10 or abs(p1x - p2x)> 10 and abs(p1y - p2y)< 10 :
             print("invalid ROI")
             self.reset_temp_obj()
@@ -423,7 +482,7 @@ class Controller:
             for i in self.vis_objects:
                 i.active = False
             self.active_flag = False
-            self.disp_img(self.image_name)
+            self.disp_img(self.image_name, self.vis_objects)
             # print("new coordinates are", self.new_start_x, self.new_start_y, self.new_end_x, self.new_end_y)
 
 
@@ -446,6 +505,11 @@ class Controller:
         self.new_end_x = None
         self.new_end_y = None
 
+    def active_window(self, bool):
+        print('check')
+        set_val = bool
+        self.df_active = set_val
+        return
 
 class GetType():
     def __init__(self):

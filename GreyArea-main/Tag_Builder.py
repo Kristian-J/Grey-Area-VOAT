@@ -4,26 +4,31 @@ from tkinter import *
 from functools import partial
 
 class SessionTags:
-    def __init__(self, origin):
+    # def __init__(self, origin):
+    def __init__ (self, tag_list, host_frame, set_active, disp_tags):
         # print(origin, origin.response, type(origin.root1))
-        self.window = origin.root1
-        self.origin = origin
+        self.set_active = set_active
+        self.disp_tags = disp_tags
+        # self.origin = origin
         self.response = None
-        self.tag_list = self.origin.tags
+        self.tag_list = tag_list #self.origin.tags
         self.exist = False
         self.tempbutton = None
-        self.local_frame = Frame(self.origin.disp_frame)
+        self.local_frame = Frame(host_frame) # Frame(self.origin.disp_frame)
 
         self.style = ttk.Style()
         self.style.configure("TButton", forground="blue", background="cyan")
-        if len(self.origin.tags) >=1:
+
+
+        self.set_active(True)
+        if len(self.tag_list) >= 1: # len(self.origin.tags) >=1:
             self.dis_tags()
-        if self.origin.df_active:
-            return
-        else:
-            self.origin.df_active = True
-            print('tf set true')
-            self.select_tags()
+        # if self.origin.df_active:
+        #     return
+        # else:
+        #     self.origin.df_active = True
+        #     print('tf set true')
+        self.select_tags()
         return
 
     def select_tags(self):
@@ -62,19 +67,11 @@ class SessionTags:
         return
 
     def quit_loop(self, event=NONE):
-        # self.local.quit()
-        self.origin.df_active = False
+        self.set_active(False) # self.origin.df_active = False
         print('tf set false')
-        self.origin.tags = self.tag_list
-        try:
-            self.origin.tempframe1.destroy()
-        except:
-            pass
-        self.origin.disp_tags()
+        # self.origin.tags = self.tag_list
+        self.disp_tags() # self.origin.disp_tags()
         self.local_frame.destroy()
-        # self.origin.session_files = SessionFiles(self.origin)
-        # self.window.quit()
-        # exit()
         return
 
     def del_button(self, i):

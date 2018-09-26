@@ -2,7 +2,25 @@ import csv
 import cv2
 from SaveData import *
 from tkinter import *
+import numpy as np
+import matplotlib.pyplot as plt
 
+im1 = cv2.imread("temp1.jpg", 0)
+im2 = cv2.imread("temp2.jpg", 0)
+
+orb = cv2.ORB_create()
+
+kp1, des1 = orb.detectAndCompute(im1, None)
+kp2, des2 = orb.detectAndCompute(im2, None)
+
+bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck = True)
+matches = bf.match(des1, des2)
+matches = sorted(matches, key = lambda x: x.distance)
+
+img3 = cv2.drawMatches(im1, kp1, im2, kp2, matches[:10], None, flags = 2)
+
+plt.imshow(img3)
+plt.show()
 
 
 # SaveToFile([[204, 187, 324, 250, 'truck'],[250, 324, 187, 204, 'car']], "hopscotch.jpg", None)
@@ -10,19 +28,21 @@ from tkinter import *
 # LoadData("C:/Users/Kriso/Pictures/Pictures/New folder (2)/r_soulcaliburgirls.txt", None, 'this is the frame name')
 
 
-img = cv2.imread('temp.jpg', cv2.IMREAD_GRAYSCALE)
-
-sift = cv2.xfeatures2d.SIFT_create()
-surf = cv2.xfeatures2d.SURF_create()
-orb = cv2.ORB_create(nfeatures=3000)
-
-# kp = sift.detect(img, None)
-keypoints, destcriptors = orb.detectAndCompute(img, None)
-img = cv2.drawKeypoints(img, keypoints, None)
-
-cv2.imshow("image", img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# ### extract features
+#
+# img = cv2.imread('temp.jpg', cv2.IMREAD_GRAYSCALE)
+#
+# sift = cv2.xfeatures2d.SIFT_create()
+# surf = cv2.xfeatures2d.SURF_create()
+# orb = cv2.ORB_create(nfeatures=3000)
+#
+# # kp = sift.detect(img, None)
+# keypoints, destcriptors = orb.detectAndCompute(img, None)
+# img = cv2.drawKeypoints(img, keypoints, None)
+#
+# cv2.imshow("image", img)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 
 
 #
