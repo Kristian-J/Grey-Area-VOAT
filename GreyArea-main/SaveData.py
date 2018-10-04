@@ -4,6 +4,7 @@ from Visual_object import *
 
 
 class SaveToFile:
+    """ Save file class. used to store generated data to a CSV text file."""
     def __init__(self, vis_objects, fname, frame_num):
         self.fname = fname
         self.objects = vis_objects
@@ -20,7 +21,7 @@ class SaveToFile:
         f.write(self.text)
         f.close()
 
-    def make_text(self, vis_obs):
+    def make_text(self, vis_obs): ###converts the object data into a stirng fromat for saving.
         index = 0
         temp = str("")
         for ob in vis_obs:
@@ -35,6 +36,8 @@ class SaveToFile:
 
 
 def set_file_name(fname, num):
+    ### sets the file name using a consistent structure.
+    ### "." is used for seperation of file type and so should not be used in naming files for processing
     x = fname.split('.')
     y = ""
     if num is not None:
@@ -48,7 +51,7 @@ def set_file_name(fname, num):
 
 class LoadData:
     """this class is for loading annotated visual object data"""
-    """input is the current file name, frame number if applicable, and the tkinter frame that will host the object"""
+    # input is the current file name, frame number if applicable, and the tkinter frame that will host the object
     def __init__(self, fname, num, host_frame):
         self.file = None
         self.fname = fname

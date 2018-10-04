@@ -3,6 +3,7 @@ import cv2
 from SaveData import *
 
 class FeatureTrack:
+    """ feature tracking api. partially implemented tracking using OpenCV libraries"""
     def __init__(self, cnt_img, fname, frame_num, objects, t_name):
         self.objects = objects
         self.t_name = t_name
@@ -11,36 +12,17 @@ class FeatureTrack:
         self.cap = cv2.VideoCapture(self.file)
         self.frame_num = frame_num
         self.temp_objects = []
-        # return
-        # print("this is the feature handler data:", self.ojects,self.t_name,self.file,self.frame_num)
+        # print("debug: this is the feature handler data:", self.ojects,self.t_name,self.file,self.frame_num)
         if self.t_name == 'None':
             print("no active tracker")
             return
         img1 = cv2.imread('temp.jpg')  ##, cv2.IMREAD_GRAYSCALE)
-        # print("&>>>>", self.frame_num, "<<<<&")
         self.cap.set(1, self.frame_num)
         ret, frame = self.cap.read()
         img2 = frame
         print("c", t_name)
             # Create a tracker based on tracker name
         self.tracker_list = ["Boosting", "MIL", "KCF", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT", "None"]
-        #
-        # if t_name == "Boosting":
-        #     tracker = cv2.TrackerBoosting_create()
-        # elif t_name == "MIL":
-        #     tracker = cv2.TrackerMIL_create()
-        # elif t_name == "KFC":
-        #     tracker = cv2.TrackerKCF_create()
-        # elif t_name == "TLD":
-        #     tracker = cv2.TrackerTLD_create()
-        # elif t_name == "MedianFlow":
-        #     tracker = cv2.TrackerMedianFlow_create()
-        # elif t_name == "GOTURN":
-        #     tracker = cv2.TrackerGOTURN_create()
-        # elif t_name == "MOSSE":
-        #     tracker = cv2.TrackerMOSSE_create()
-        # elif t_name == "CSRT":
-        #     tracker = cv2.TrackerCSRT_create()
 
         multiTracker = cv2.MultiTracker_create()
         print(self.objects)
@@ -66,24 +48,6 @@ class FeatureTrack:
 
         SaveToFile(self.objects, self.file, self.frame_num)
 
-
-            # print("modified:", BB)
-            # ROI = []
-            # for i in BB:
-            #     ROI.append(int(i))
-            #
-            # print("modified 2:", BB, ROI)
-            # if ok:
-            #     obj.obj_location = ROI
-            #     self.temp_objects.append(obj)
-            #     print(self.temp_objects)
-
-        # SaveToFile(self.temp_objects, self.file, self.frame_num)
-        # for i in self.temp_objects:
-        #     print(i.obj_location)
-            # cv2.imshow("image1", img2)
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
         return
 
     def createTracker(self, tracker_name):
@@ -113,6 +77,7 @@ class FeatureTrack:
         return tracker
 
 class FeatureExtract():
+    """ Feature extraction class. not fully implemented."""
     def __init__(self, fname, objects):
         if len(objects) < 1:
             return

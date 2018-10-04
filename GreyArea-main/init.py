@@ -15,105 +15,102 @@ from functools import partial
 # style = ttk.Style()
 # style.configure("TButton", forground="blue", background="cyan")
 
+
 class Controller:
     def __init__(self, ftype):
         self.ftype = ftype
         self.cnt_vid = None
-
-        self.files =[]  ### list of current filenames
-        self.session_tags = None ### for storing the instance of SessionTags
-        self.tags =[]  ### list of current tags
-        self.session_files = None ### for storing the instance of SessionFiles
+        self.files = []  # list of current filenames
+        self.session_tags = None  # for storing the instance of SessionTags
+        self.tags = []  # list of current tags
+        self.session_files = None  # for storing the instance of SessionFiles
         self.image_name = None
         self.video_disp = None
-        ### creating the main window ###
-        self.root1 = Tk() ### creating main window
+        # creating the main window #
+        self.root1 = Tk()  # creating main window
         self.root1.title("Welcome")
         self.root1.geometry("1400x900")
 
+        # setting the global ttk style. peramiters should affect button apearance but do not apply correctly
         style = ttk.Style()
         style.configure("TButton", forground = "blue", background = "cyan")
 
-        ### variables for handling ROI information
-        self.temp_start_x = None ### temp coords of newly drawn/ currently being drawn ROI
+        # variables for handling ROI information before coords are validated
+        self.temp_start_x = None  # temp coords of newly drawn/ currently being drawn ROI
         self.temp_start_y = None
         self.temp_end_x = None
         self.temp_end_y = None
-        self.temp_tag = None ### holds tag of temp object that is yet to be saved as an object
-        self.temp_obj = None ### holds temp ROI coordinates
+        self.temp_tag = None  # holds tag of temp object that is yet to be saved as an object
+        self.temp_obj = None  # holds temp ROI coordinates
 
-        self.new_start_x = None ### holds validated new ROI
+        # variables for handling ROI information after coords are validated and until roi is saved
+        self.new_start_x = None  # holds validated new ROI
         self.new_start_y = None
         self.new_end_x = None
         self.new_end_y = None
-        self.new_obj = None ### Holds newly created single visual object
+        self.new_obj = None  # Holds newly created single visual object
 
-        # self.active_obj = None
         self.active_flag = False
 
+        # placeholder variables.
         self.vis_objects = []
-
         self.current_file = None
 
-        self.point_x = None
+        self.point_x = None  # used in coord_validate function
         self.point_y = None
 
-        ### variable for holding image scale ratio for ROI scaling.
+        # variable for holding image scale ratio for ROI scaling.
         self.scale_ratio = 1
 
-        # print(self.root1.winfo_pointerxy())
-        ### setting the structure for the window and component elements ###
+        # setting the structure for the window including a perent container and child containers. #
         self.tags_frame = Frame(self.root1)
-        self.tags_frame.grid(row=2, column=0, rowspan= 4, columnspan = 1, sticky=N, pady = 10)
+        self.tags_frame.grid(row = 2, column = 0, rowspan = 4, columnspan = 1, sticky = N, pady = 10)
         self.tf_active = False
 
-        ### frame for displaying file name buttons
+        # frame for displaying file name buttons
         self.files_frame = Frame(self.root1)
-        self.files_frame.grid(row=0, column=11, rowspan= 10, columnspan = 1, sticky=N)
+        self.files_frame.grid(row = 0, column = 11, rowspan = 10, columnspan = 1, sticky = N)
         self.ff_active = False
 
-        ### frame for main display
+        # frame for main display
         self.disp_frame = Frame(self.root1)
-        self.disp_frame.grid(row=0, column=1, rowspan= 7, columnspan = 9,sticky=NE)
+        self.disp_frame.grid(row = 0, column = 1, rowspan = 7, columnspan = 9,sticky = NE)
         self.df_active = False
 
-        ### frame for positioning the video controls
+        # frame for positioning the video controls
         self.controls_frame = Frame(self.root1)
-        self.controls_frame.grid(row=7, column=1,  columnspan = 9, sticky=NE)
+        self.controls_frame.grid(row = 7, column = 1,  columnspan = 9, sticky = NE)
         self.cf_active = False
 
-        ### frame for displaying object tags
+        # frame for displaying object tags
         self.obj_tags_frame = Frame(self.root1)
-        self.obj_tags_frame.grid(row=8, column=1,  columnspan = 9, sticky=NE)
+        self.obj_tags_frame.grid(row = 8, column = 1,  columnspan = 9, sticky = NE)
 
         # Menu Bar
         self.menu_frame = Frame(self.root1)
-        self.menu_frame.grid(row=0, column=0, rowspan= 2,sticky=N)
+        self.menu_frame.grid(row = 0, column = 0, rowspan = 2,sticky = N)
 
+        # main menu. contains a dropdown with active and placeholder elements
         menu = Menu(self.root1)
-        self.root1.config(menu=menu)
-
+        self.root1.config(menu = menu)
         file = Menu(menu)
         # file.add_command(label='Open', command=OpenFile)
         # file.add_command(label='Exit', command=lambda: exit())
         file.add_command(label='Exit', command=lambda: self.root1.quit())
         menu.add_cascade(label='File', menu=file)
 
+        # setting buttons for file selection and tag imput functions
         button3 = ttk.Button(self.menu_frame, width=15, text="Add Tags")
         button3.grid(row=1, column=1, sticky=N)
         button3.bind("<Button-1>", self.get_tags)
         button4 = ttk.Button(self.menu_frame, width=15, text="Select File")
-        button4.grid(row=2, column=1,sticky = N, padx = 6) # button4.grid(row=2, column=1, sticky=N, padx = 5)
+        button4.grid(row=2, column=1,sticky = N, padx = 6)
         button4.bind("<Button-1>", self.get_files)
-        # button4.config(bg = "#FAD7A0", fg = "blue" , relief = RIDGE, highlightcolor= "red", bd = 5)
 
-
+        # Tracker type selection handling
         self.tracker_list = ["Boosting", "MIL","KCF", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT", "None"]
-
         self.tracker_frame = Frame(self.menu_frame)
         self.tracker_frame.grid(row=3, column=1)
-        # self.t_type = StringVar()
-        # self.t_type.set("None")
         self.t_type = "None"
         self.t_type_label = ttk.Label(self.tracker_frame, text = "Selected Tracker:")
         self.t_type_label.grid()
@@ -121,29 +118,11 @@ class Controller:
         self.t_type_select.grid()
 
 
-        # option_frame=Frame(self.menu_frame)
-        # option_frame.grid(row=3, column = 1)
-        # self.selected_tracker=StringVar()
-        # # self.active_tracker=StringVar()
-        # tracker_name = "MIL"
-        # # self.active_tracker.set(tracker_name)
-        # self.selected_tracker.set(tracker_name)
-        # # print('initial traker name is: ', self.selected_tracker.get())
-        # tracker_menu = ttk.OptionMenu(option_frame, self.selected_tracker, "Boosting", "MIL","KCF", "TLD", "MedianFlow", "GOTURN", "MOSSE", "CSRT", "None")
-        # tracker_menu.config(width=10)
-        # tracker_menu.grid(row = 1, column = 0)
-        # thislabel = ttk.Label(option_frame, text = 'Tracker:')
-        # thislabel.grid(row = 0, column = 0)
-        # thislabel2 = ttk.Label(option_frame, textvariable = self.set_tracker)
-        # thislabel2.grid(row = 0, column = 1)
-        # self.tracker_select = ttk.Button(option_frame, text = "set", command = self.set_tracker)
-        # self.tracker_select.grid(row = 2, column = 0)
-
         style = ttk.Style()
         style.configure("TButton", forground="blue", background="cyan")
         return
 
-    def select_tracker(self):
+    def select_tracker(self):  # gets user input via selection buttons. presented in main display window
         if self.df_active:
             return
         else:
@@ -154,41 +133,34 @@ class Controller:
             print("tracker name : ", t)
             temp_button = ttk.Button(this_frame, text = t, command = partial(self.set_tracker, t, this_frame) )
             temp_button.grid()
-        # print("a", self.selected_tracker.get())
-        # self.selected_tracker.set(self.selected_tracker.get())
-        # print("b", self.selected_tracker)
-
         return
-
-    def set_tracker(self, tname, frame):
-        print("almost there buddy, keep up the good work", tname)
+    def set_tracker(self, tname, frame):  # sets the selected tracker as the active tracker
+        # print("debug: tracker selected is;", tname)
         self.t_type = tname
         self.t_type_select.config(text = tname)
         frame.destroy()
         self.active_window(False)
         return
 
-    def get_tags(self, event=NONE):
+    def get_tags(self, event=NONE):  # gets the user imput, and ads it to the list of reference objects
         if self.df_active:
             return
         else:
-            self.session_tags = SessionTags(self.tags, self.disp_frame, self.active_window, self.disp_tags) #= SessionTags(self)
+            self.session_tags = SessionTags(self.tags, self.disp_frame, self.active_window, self.disp_tags)
             self.tags = self.session_tags.tag_list
-        # print('these are the current tags', self.tags)
         return
     def get_files(self, event=NONE):
         if self.df_active:
             return
         else:
             pass
-        if self.session_files is None:
+        if self.session_files is None:  # creates an instance of the session files class if it has not already been done.
             self.session_files = SessionFiles(self.files, self.root1, self.disp_frame, self.files_frame, self.ftype, self.active_window, self.img_call, self.disp_vid)
-        else:
+        else:  # calls the class to get additional imput from the user
             self.session_files.select_files()
-        # print('these are the current files', self.files)
         return
 
-    def disp_tags(self): ### displays general tag list as buttons
+    def disp_tags(self):  # displays general tag list as buttons
         try:
             self.tempframe1.destroy()
         except:
@@ -201,27 +173,13 @@ class Controller:
             for i in self.tags:
                 self.tempbutton = ttk.Button(self.tempframe1, text=i ,width=15, command = partial(self.add_temp_tag, i))
                 self.tempbutton.grid(sticky=N)
-    #
-    # def disp_files(self):
-    #     self.tempframe2 = Frame(self.files_frame)
-    #     self.tempframe2.grid(sticky=N)
-    #     if len(self.files) > 0:
-    #         if self.ftype == 'img':
-    #             for i in self.files:
-    #                 self.tempbutton = ttk.Button(self.tempframe2, text=i ,width=20, command = partial(self.img_call, i))
-    #                 self.tempbutton.grid(column=0)
-    #         else:
-    #             for i in self.files:
-    #                 self.tempbutton = ttk.Button(self.tempframe2, text=i ,width=20, command = partial(self.disp_vid, i))
-    #                 self.tempbutton.grid(column=0)
 
-    def img_call(self, fname):
+    def img_call(self, fname): ### display img wrapper
         if len(self.vis_objects) >= 1:
             SaveToFile(self.vis_objects, self.current_file, None)
         for i in self.vis_objects:
             if i.active:
                 i.local_frame.destroy()
-
         self.reset_temp_obj()
         self.reset_new_obj()
         self.vis_objects = []
@@ -230,7 +188,6 @@ class Controller:
         if tryload.load:
             self.vis_objects = tryload.image_objects
         self.current_file = fname
-
         try:
             self.tempframe3.destroy()
         except:
@@ -258,13 +215,13 @@ class Controller:
         except:
             print("could not destroy local_frame")
             pass
-        print("just checking:", self.vis_objects, visobjects)
+        # print("debug: currnet visual objects", self.vis_objects, visobjects)
         if len(visobjects) >=1:
             self.vis_objects = visobjects
         else:
             self.vis_objects = []
         ### automatically add new object tags to session tags
-        # print("and here the objects are :", self.video_disp.vis_objects)
+        # print("debug :", self.video_disp.vis_objects)
         for i in self.vis_objects:
             if i.obj_tag not in self.tags:
                 self.tags.append(i.obj_tag)
@@ -274,20 +231,18 @@ class Controller:
                     pass
                 self.disp_tags()
 
-
-        # establishes the host frame for display
+        ### button linked to the extract function.
         self.local_frame = Frame(self.disp_frame)
         self.local_frame.grid()
-
         self.image_name = fname
 
+        # Extract features button.
         self.local_button = ttk.Button(self.local_frame, text = "extract features", command = partial(FeatureExtract, self.image_name, self.vis_objects))
         self.local_button.grid()
         image = cv2.imread(self.image_name) ### imports the image
         if self.new_start_x is not None and self.new_end_x is not None:
             cv2.rectangle(image, (self.new_start_x, self.new_start_y), (self.new_end_x, self.new_end_y),(0, 0, 255), 4)
         if len(self.vis_objects)>=1:
-            # print(self.vis_objects, len(self.vis_objects))
             for i in self.vis_objects:
                 coords = i.obj_location
                 print(i, i.active, i.obj_location, i.obj_tag)
@@ -301,16 +256,16 @@ class Controller:
                     i.disp_tag()
                 else:
                     cv2.rectangle(image, (coords[0], coords[1]), (coords[2], coords[3]),(200, 0, 0), 4)
-            # print(self.vis_objects)
-            # print("visobj coords: ", coords)
 
-        # Rearrange the color channel
+
+        ### Rearrange the color channel
         b, g, r = cv2.split(image)
         img = cv2.merge((r, g, b))
-        # Convert the Image object into a TkPhoto object
+        ### Convert the Image object into a TkPhoto object
         img = Image.fromarray(img)
 
-        basewidth = 1100  ### sets control on image size, with aspect ratio intact
+
+        basewidth = 1100  ### sets control on image size, with aspect ratio intact. adjust this to fit to screen size
         wpercent = (basewidth / float(img.size[0])) ### image scale ratio
         self.scale_ratio = wpercent
         hsize = int((float(img.size[1]) * float(wpercent)))
@@ -325,22 +280,19 @@ class Controller:
 
         ### image event handling
         label.bind("<Button-1>", self.bind_click )
-        # label.bind("<B1-Motion>", self.bind2 )
         label.bind("<ButtonRelease-1>", self.bind_release )
-        # label.bind("<Return>")
-        # label.bind("<Leave>")
         self.root1.bind("<KeyPress>",self.keybind)
         self.root1.bind("<BackSpace>", self.bind_backSpace)
 
         return
     ### image event handling functions
     def bind_click(self, event): ### ROI mouse click event manager
-        print('at bind1', event.x, event.y)
+        # print('debug: at bind lclick. imput data', event.x, event.y)
         self.temp_start_x = int(event.x//self.scale_ratio)
         self.temp_start_y = int(event.y//self.scale_ratio)
-        print('at bind1', self.temp_start_x, self.temp_start_y)
+        # print('debug: at bind lclick. stored data', self.temp_start_x, self.temp_start_y)
         return
-    def bind2(self, event):
+    def bind2(self, event): ### click drag
         self.temp_end_x = int(event.x//self.scale_ratio)
         self.temp_end_y = int(event.y//self.scale_ratio)
         # print('at bind2',self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y)
@@ -349,18 +301,17 @@ class Controller:
         self.temp_end_x = int(event.x//self.scale_ratio)
         self.temp_end_y = int(event.y//self.scale_ratio)
         print('at bind3',self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y, self.image_name)
-        # self.disp_img(self.image_name)
         self.coord_validate(self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y)
 
-        # self.temp_obj[0] = [self.temp_start_x, self.temp_start_y, self.temp_end_x, self.temp_end_y] ### redundant
         # print("tempobj = ",self.temp_obj)
-    def bind_backSpace(self,event):
-        print('backspace was pressed')
+
+    def bind_backSpace(self,event): ### binding the deleted/backspace key
+        # print('debug: backspace was pressed')
         if self.df_active:
             return
         for i in self.vis_objects:
             if i.active:
-                confirm = user_confirm("do you want to remove this object?").response
+                confirm = UserConfirm("do you want to remove this object?").response
                 if confirm:
                     self.vis_objects.remove(i)
                     try:
@@ -369,7 +320,7 @@ class Controller:
                         pass
                     self.disp_img(self.image_name, self.vis_objects)
                     self.active_flag = False
-                    print("object should have been removed")
+                    # print("debug: object should have been removed")
                     return
                 else:
                     return
@@ -396,14 +347,11 @@ class Controller:
                 self.vis_objects.append(self.new_obj)
                 self.reset_temp_obj()
                 self.disp_img(self.image_name,self.vis_objects)
-
-            # print('temp_obj', self.temp_obj)
-            # print("vis_objects", self.vis_objects)
         return
 
-    def add_temp_tag(self, i):
+    def add_temp_tag(self, i): ### adds a tag to the active object.
         if self.active_flag:
-            print("flag is active")
+            # print("debug :flag is active")
             for obj in self.vis_objects:
                 if obj.active:
                     obj.add_tag(i)
@@ -416,31 +364,29 @@ class Controller:
                 self.temp_tag = i
             self.disp_temp_tag()
 
-    def disp_temp_tag(self):
+    def disp_temp_tag(self): ### displays the reverence tags
         try:
             self.tempframe3.destroy()
         except:
             print('failed to destroy')
         self.tempframe3 = Frame(self.obj_tags_frame)
         self.tempframe3.grid()
-
-        counter = 0
         if self.temp_tag is not None:
                 self.tempbutton = Button(self.tempframe3, text=self.temp_tag, width=15, command = partial(self.del_obj_tag, self.temp_tag))
-                self.tempbutton.grid(row = 0, column = counter, sticky=N)
+                self.tempbutton.grid(row = 0, column = 0, sticky=NW)
 
     def del_obj_tag(self, i):
         self.temp_tag = None
         self.disp_temp_tag()
 
-    def coord_validate(self, p1x, p1y, p2x, p2y):
+    def coord_validate(self, p1x, p1y, p2x, p2y): ### validating the mouse click and release locations
         if p1x == None or p1y == None:
             return
         if abs(p1x - p2x)< 10 and abs(p1y - p2y)< 10:
             # print(abs(p1x - p2x))
             self.point_x = p1x
             self.point_y = p1y
-            """need to add conditional check. if temp_tags is not empty, and a new (unsaved) ROI exists or active object has been modified, check if user wants to save the object """
+            ### possibly add conditional check. if temp_tags is not empty, and a new (unsaved) ROI exists or active object has been modified, check if user wants to save the object
             self.reset_temp_obj()
             self.reset_new_obj()
             point = [self.point_x, self.point_y]
@@ -488,7 +434,7 @@ class Controller:
             self.disp_img(self.image_name, self.vis_objects)
             # print("new coordinates are", self.new_start_x, self.new_start_y, self.new_end_x, self.new_end_y)
 
-
+        ### functions to empty required variables
     def reset_temp_obj(self):
         self.temp_start_x = None
         self.temp_start_y = None
@@ -501,13 +447,13 @@ class Controller:
         except:
             pass
         return
-
     def reset_new_obj(self):
         self.new_start_x = None
         self.new_start_y = None
         self.new_end_x = None
         self.new_end_y = None
 
+        ### to destry the wind
     def active_window(self, bool):
         print('check')
         set_val = bool
@@ -515,13 +461,12 @@ class Controller:
         return
 
 class GetType():
+    """ This Class is used to set the file type. this is used for control purposes."""
     def __init__(self):
         print("this it the type control")
-        self.response = None
+        self.response = None ### this is the main variable of the class and holds the type as a string.
 
         self.root0 = Tk()
-        style = ttk.Style()
-        style.configure("TButton", forground="red", background="blue")
         self.root0.geometry("300x100")
         self.frame = Frame(self.root0)
         self.frame.grid(row = 0, column = 0)
@@ -534,30 +479,33 @@ class GetType():
         button2 = ttk.Button(self.frame, text="Video")
         button2.grid(row=1, column=1, sticky=N)
         button2.bind("<Button-1>", self.ftypevid)
-
         self.root0.mainloop()
-    def ftypeim(self, event=NONE):
+
+    def ftypeim(self, event=NONE): # set the type to img
         self.response = "img"
         # print("img?")
         self.quit_loop()
-    def ftypevid(self, event=NONE):
+
+    def ftypevid(self, event=NONE): # set the type to vid
         self.response = "vid"
         # print("vid?")
         self.quit_loop()
 
-    def quit_loop(self, event=NONE):
+    def quit_loop(self, event=NONE): #exit the window
         self.root0.withdraw()
         self.frame.destroy()
         self.root0.quit()
         return
 
-class user_confirm():
+class UserConfirm():
+    """ this is a framework for getting a user conformation."""
     def __init__(self, string):
         self.question = string
         self.response = None
         self.local_root1 = Tk()
         self.local_root1.title("Welcome")
         self.local_root1.geometry("300x300")
+
         label = ttk.Label(self.local_root1, text=self.question).grid(row=0, column=0, columnspan=2)
         self.positive = ttk.Button(self.local_root1, text="Continue", command = partial(self.assign_response, True))
         self.positive.grid(row=1, column=0, sticky=N)
@@ -565,6 +513,7 @@ class user_confirm():
         self.negative = ttk.Button(self.local_root1, text="Cancel", command = partial(self.assign_response, False))
         self.negative.grid(row=1, column=1, sticky=N)
         self.local_root1.mainloop()
+
     def assign_response(self, response, event=NONE):
         self.response = response
         print("the user response is: ", self.response)
@@ -573,14 +522,13 @@ class user_confirm():
         self.local_root1.withdraw()
         self.local_root1.quit()
 
+
 f_type = GetType()
 while f_type.response == None:
     f_type = GetType()
 control_type = f_type.response
 print(control_type)
 primary = Controller(control_type)
-# session_tags = primary.session_tags
-# session_tags = SessionTags(primary)
 
 primary.root1.mainloop()
 

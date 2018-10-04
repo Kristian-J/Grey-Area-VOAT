@@ -4,34 +4,27 @@ from tkinter import *
 from functools import partial
 
 class SessionTags:
-    # def __init__(self, origin):
+    """ class for building a list of user input text inputs."""
     def __init__ (self, tag_list, host_frame, set_active, disp_tags):
-        # print(origin, origin.response, type(origin.root1))
         self.set_active = set_active
         self.disp_tags = disp_tags
-        # self.origin = origin
         self.response = None
-        self.tag_list = tag_list #self.origin.tags
+        self.tag_list = tag_list
         self.exist = False
         self.tempbutton = None
-        self.local_frame = Frame(host_frame) # Frame(self.origin.disp_frame)
+        self.local_frame = Frame(host_frame)
 
         self.style = ttk.Style()
         self.style.configure("TButton", forground="blue", background="cyan")
 
 
         self.set_active(True)
-        if len(self.tag_list) >= 1: # len(self.origin.tags) >=1:
+        if len(self.tag_list) >= 1:
             self.dis_tags()
-        # if self.origin.df_active:
-        #     return
-        # else:
-        #     self.origin.df_active = True
-        #     print('tf set true')
         self.select_tags()
         return
 
-    def select_tags(self):
+    def select_tags(self): ### buttons and input fields for capturing user imput.
         self.local_frame.grid(row=0, column=0)
         ttk.Label(self.local_frame, text="Please specify you're object tags").grid(row=0, column=0, columnspan=2)
 
@@ -51,7 +44,7 @@ class SessionTags:
         U_input_exit.grid(row= 3,column=2, sticky = N)
         U_input_exit.bind("<Button-1>", self.quit_loop)
 
-    def add_tag(self, event=NONE):
+    def add_tag(self, event=NONE): ###adding new tag to the list
         global U_input
         tag = U_input.get()
         print(tag)
@@ -67,10 +60,9 @@ class SessionTags:
         return
 
     def quit_loop(self, event=NONE):
-        self.set_active(False) # self.origin.df_active = False
+        self.set_active(False)
         print('tf set false')
-        # self.origin.tags = self.tag_list
-        self.disp_tags() # self.origin.disp_tags()
+        self.disp_tags()
         self.local_frame.destroy()
         return
 
@@ -78,14 +70,13 @@ class SessionTags:
         # counter = 0
         for item in self.tag_list:
             if item == i:
-                # print(i, item, counter)
+                # print("debug: ", i, item, counter)
                 self.tag_list.remove(item)
                 self.dis_tags()
                 return
             else:
                 pass
             # counter += 1
-
 
     def dis_tags(self):
         if self.exist:
@@ -102,12 +93,3 @@ class SessionTags:
 
 
 
-
-
-# tag_list = ["jack","flash"]
-# root = Tk()
-# session = File_Type()
-#
-# root.mainloop()
-#
-# print('end', session.tag_list)

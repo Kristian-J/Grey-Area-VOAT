@@ -6,6 +6,7 @@ from functools import partial
 
 
 class VisualObject:
+    """ main Visual Object handler class. used to manage and update individual objects(ROIs)"""
     def __init__(self, obj_xy, obj_tag, host_frame):
         self.p1_x = obj_xy[0]
         self.p1_y = obj_xy[1]
@@ -45,7 +46,7 @@ class VisualObject:
     #             pass
             # counter += 1
 
-    def check_inside(self, point):
+    def check_inside(self, point): ### used to determine if the object hase been clicked but the user
         pass
         if self.check_between(point[0], self.p1_x, self.p2_x) and self.check_between(point[1], self.p1_y, self.p2_y):
             return True

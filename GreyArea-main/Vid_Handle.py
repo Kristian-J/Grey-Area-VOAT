@@ -8,6 +8,7 @@ from Freature_handler import *
 
 
 class VidHandler():
+    """ video handler class. Extracts frames, converts to img format and sends to init display img class. """
     def __init__(self, origin):
         self.origin = origin
         self.file = origin.cnt_vid
@@ -19,13 +20,17 @@ class VidHandler():
         self.disp_img = self.origin.disp_img
         self.cap = cv2.VideoCapture(self.file)
 
+        #get the max frame number and sets the current frame to "0"
         self.total_frames = self.cap.get(7)
-        print('the numer of frames are: ', self.total_frames)
+        print('debug: the numer of frames are: ', self.total_frames)
         self.frame_num = 0
         self.labelmessage = "The current frame is #" + str(self.frame_num)
 
+        #initialise display with default frame(0)
         self.extract_frame(self.frame_num)
-        self.local_frame = Frame(self.origin.controls_frame) # (self.origin.controls_frame)
+
+        #creats a local frame for video controls
+        self.local_frame = Frame(self.origin.controls_frame)
         self.local_frame.grid(sticky = N)
 
         # global f_input
@@ -34,9 +39,11 @@ class VidHandler():
 
         self.fnum_label = ttk.Label(self.local_frame, text=self.labelmessage)
         self.fnum_label.grid(row=0, column=0, padx = 5)
+
         style = ttk.Style()
         style.configure("TButton", forground="blue", background="cyan")
 
+        # creates the control buttons
         back_jump = ttk.Button(self.local_frame, text = " <<-- ", command = partial(self.go_to_frame, -5) )
         back_jump.grid(row=0, column=1, padx = 5)
         back_step = ttk.Button(self.local_frame, text = " <- ", command = partial(self.go_to_frame, -1))
@@ -52,11 +59,13 @@ class VidHandler():
         frame_sel = ttk.Button(self.local_frame, text="Go to Frame", command=self.get_f_num)
         frame_sel.grid(row=0, column=6)
 
-    def get_f_num(self, event=NONE):
+    def get_f_num(self, event=NONE): ### gets frame number from user input
         print("get frame number. here")
         self.temp_frame = Frame(self.local_frame)
         self.temp_frame.grid(row=0, column=7)
-        temp_label = ttk.Label(self.temp_frame).grid(row=0, column=0)
+
+        # takes user input integer for setting current frame
+        temp_label = ttk.Label(self.temp_frame, text = "Please input an int").grid(row=0, column=0)
         self.f_input = ttk.Entry(self.temp_frame, width=20)
         self.f_input.grid(row=1, column=0)
         self.f_input.bind("<Return>", self.set_f_num)
@@ -68,9 +77,7 @@ class VidHandler():
         f_input_back = ttk.Button(self.temp_frame, text="cancel", command=self.back)
         f_input_back.grid(row=0, column=1)
 
-        # global f_input
-
-    def set_f_num(self, event):
+    def set_f_num(self, event): ### sets the user input captured by get_f_num
         frame_num = self.f_input.get()
         print('the frame number is: ', frame_num, type(frame_num))
         try:
@@ -97,7 +104,7 @@ class VidHandler():
             pass
         return
 
-    def go_to_frame(self, n):
+    def go_to_frame(self, n): ### saves existing data and calls to extract the specified frame for display.
         # print('incoming value = ', self.frame_num)
         frame_num = self.frame_num + n
         # print("self.frame_num = ", self.frame_num)
@@ -113,7 +120,7 @@ class VidHandler():
             print("number out of range")
             return
 
-    def extract_frame(self, num):
+    def extract_frame(self, num): ### extracts the desired frame and sends it to the main display.
             for i in self.vis_objects:
                 if i.active:
                     i.local_frame.destroy()
@@ -138,7 +145,3 @@ class VidHandler():
             self.disp_img('temp.jpg', self.vis_objects)
 
 
-
-# self.reset_temp_obj()
-# self.reset_new_obj()
-# self.vis_objects = []
